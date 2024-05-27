@@ -28,6 +28,7 @@ public extension BaseUITestCase {
 
 // MARK: - UI Element Helpers
 public extension BaseUITestCase {
+    @discardableResult
     func waitForElement(_ query: XCUIElementQuery, named name: String, timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         let element = query[name]
         
@@ -55,5 +56,27 @@ public extension BaseUITestCase {
         }
         
         app.tap()
+    }
+    
+    func typeInField(app: XCUIApplication, fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false) {
+        let field = getField(app: app, fieldId: fieldId, isSecure: isSecure)
+        field.tap()
+        
+        if clearField {
+            field.press(forDuration: 1.2)
+            waitForElement(app.menuItems, named: "Select All").tap()
+            field.typeText(XCUIKeyboardKey.delete.rawValue)
+        }
+        
+        field.typeText(text)
+    }
+    
+    @discardableResult
+    func getField(app: XCUIApplication, fieldId: String, isSecure: Bool) -> XCUIElement {
+        if isSecure {
+            return waitForElement(app.secureTextFields, named: fieldId)
+        } else {
+            return waitForElement(app.textFields, named: fieldId)
+        }
     }
 }
