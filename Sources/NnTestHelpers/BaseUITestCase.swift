@@ -58,8 +58,8 @@ public extension BaseUITestCase {
         app.tap()
     }
     
-    func typeInField(app: XCUIApplication, fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false) {
-        let field = getField(app: app, fieldId: fieldId, isSecure: isSecure)
+    func typeInField(fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false) {
+        let field = getField(fieldId: fieldId, isSecure: isSecure)
         field.tap()
         
         if clearField {
@@ -72,7 +72,7 @@ public extension BaseUITestCase {
     }
     
     @discardableResult
-    func getField(app: XCUIApplication, fieldId: String, isSecure: Bool) -> XCUIElement {
+    func getField(fieldId: String, isSecure: Bool) -> XCUIElement {
         if isSecure {
             return waitForElement(app.secureTextFields, named: fieldId)
         } else {
