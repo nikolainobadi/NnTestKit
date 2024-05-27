@@ -56,17 +56,40 @@ public extension XCTestCase {
         XCTAssertNoThrow(try action(), "unexpected error", file: file, line: line)
     }
     
+    func asyncAssertNoErrorThrown(action: @escaping () async throws -> Void, file: StaticString = #filePath, line: UInt = #line) async {
+        do {
+            try await action()
+        } catch {
+            XCTFail("unexpected error", file: file, line: line)
+        }
+    }
+    
     func assertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType, action: @escaping () throws -> Void, file: StaticString = #filePath, line: UInt = #line) {
+    
         do {
             try action()
             XCTFail("expected an error but none were thrown", file: file, line: line)
         } catch {
-            guard let receivedError = error as? ErrorType else {
-                XCTFail("unexpected error", file: file, line: line)
-                return
-            }
-            
-            XCTAssertEqual(receivedError, expectedError, "received error does not match expected error", file: file, line: line)
+            handleError(error, expectedError: expectedError, file: file, line: line)
         }
+    }
+    
+    func asyncAssertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType, action: @escaping () async throws -> Void, file: StaticString = #filePath, line: UInt = #line) async {
+    
+        do {
+            try await action()
+            XCTFail("expected an error but none were thrown", file: file, line: line)
+        } catch {
+            handleError(error, expectedError: expectedError, file: file, line: line)
+        }
+    }
+    
+    func handleError<ErrorType: Error & Equatable>(_ error: Error, expectedError: ErrorType, file: StaticString, line: UInt) {
+        guard let receivedError = error as? ErrorType else {
+            XCTFail("unexpected error", file: file, line: line)
+            return
+        }
+        
+        XCTAssertEqual(receivedError, expectedError, "received error does not match expected error", file: file, line: line)
     }
 }
