@@ -14,4 +14,8 @@ public extension ProcessInfo {
     static var isTesting: Bool {
         return processInfo.environment[IS_UI_TESTING] == IS_TRUE || NSClassFromString("XCTestCase") != nil
     }
+    
+    static func containsKey(_ key: String) -> Bool {
+        return processInfo.environment[key] == IS_TRUE
+    }
 }
