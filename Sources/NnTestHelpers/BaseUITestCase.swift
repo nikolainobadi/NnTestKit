@@ -46,7 +46,7 @@ public extension BaseUITestCase {
         XCTAssertTrue(result == .completed, "\(name) should appear withing \(timeout) seconds", file: file, line: line)
     }
     
-    func waitForThirdPartyAlert(app: XCUIApplication, decription: String, button: String) {
+    func waitForThirdPartyAlert(decription: String, button: String, withAppTap: Bool = false) {
         addUIInterruptionMonitor(withDescription: description) { (alert) -> Bool in
             if alert.buttons[button].exists {
                 alert.buttons[button].tap()
@@ -55,7 +55,9 @@ public extension BaseUITestCase {
             return false
         }
         
-        app.tap()
+        if withAppTap {
+            app.tap()
+        }
     }
     
     func typeInField(fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false) {
