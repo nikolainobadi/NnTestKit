@@ -134,8 +134,8 @@ public extension BaseUITestCase {
         tapAlertSheetButton(alertSheetButtonId ?? swipeButtonId, file: file, line: line)
     }
     
-    func deleteRow(rowText: String, parentView: XCUIElement? = nil, swipeButtonId: String = "Delete", alertSheetButtonId: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
-        let row = getRowContainingText(parentView: parentView, text: rowText, file: file, line: line)
+    func deleteRow(rowText: String, parentView: XCUIElement? = nil, swipeButtonId: String = "Delete", alertSheetButtonId: String? = nil, maxScrollAttempts: Int = 3, file: StaticString = #filePath, line: UInt = #line) {
+        let row = getRowContainingText(parentView: parentView, text: rowText, maxScrollAttempts: maxScrollAttempts, isRequiredToExist: true, file: file, line: line)
         
         deleteRow(row: row, swipeButtonId: swipeButtonId, alertSheetButtonId: alertSheetButtonId, file: file, line: line)
     }
