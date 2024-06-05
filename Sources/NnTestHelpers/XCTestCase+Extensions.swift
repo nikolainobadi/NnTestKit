@@ -34,7 +34,7 @@ public extension XCTestCase {
     
     func assertPropertyEquality<T: Equatable>(_ property: T?, name: String? = nil, expectedProperty: T, file: StaticString = #filePath, line: UInt = #line) {
         assertProperty(property, name: name) { receivedProperty in
-            XCTAssertEqual(receivedProperty, expectedProperty, "values don't match", file: file, line: line)
+            XCTAssertEqual(receivedProperty, expectedProperty, "\(receivedProperty) does not match expectation: \(expectedProperty)", file: file, line: line)
         }
     }
     
@@ -52,15 +52,15 @@ public extension XCTestCase {
         }
     }
     
-    func assertNoErrorThrown(action: @escaping () throws -> Void, file: StaticString = #filePath, line: UInt = #line) {
-        XCTAssertNoThrow(try action(), "unexpected error", file: file, line: line)
+    func assertNoErrorThrown(action: @escaping () throws -> Void, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertNoThrow(try action(), message ?? "unexpected error", file: file, line: line)
     }
     
-    func asyncAssertNoErrorThrown(action: @escaping () async throws -> Void, file: StaticString = #filePath, line: UInt = #line) async {
+    func asyncAssertNoErrorThrown(action: @escaping () async throws -> Void, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) async {
         do {
             try await action()
         } catch {
-            XCTFail("unexpected error", file: file, line: line)
+            XCTFail(message ?? "unexpected error", file: file, line: line)
         }
     }
     
@@ -90,6 +90,6 @@ public extension XCTestCase {
             return
         }
         
-        XCTAssertEqual(receivedError, expectedError, "received error does not match expected error", file: file, line: line)
+        XCTAssertEqual(receivedError, expectedError, "\(receivedError) does not match expected error: \(expectedError)", file: file, line: line)
     }
 }
