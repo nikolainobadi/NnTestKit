@@ -140,9 +140,12 @@ public extension BaseUITestCase {
         deleteRow(row: row, swipeButtonId: swipeButtonId, alertSheetButtonId: alertSheetButtonId, file: file, line: line)
     }
     
-    func typeInField(fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+    func typeInField(fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false, shouldTapFieldBeforeTyping: Bool = true, file: StaticString = #filePath, line: UInt = #line) {
         let field = getField(fieldId: fieldId, isSecure: isSecure, file: file, line: line)
-        field.tap()
+        
+        if shouldTapFieldBeforeTyping {
+            field.tap()
+        }
         
         if clearField {
             if let stringValue = field.value as? String, !stringValue.isEmpty {
