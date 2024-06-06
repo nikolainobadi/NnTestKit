@@ -75,6 +75,10 @@ public extension BaseUITestCase {
             let row = parentView.cells.containing(.staticText, identifier: text).element
             
             if row.exists && row.isHittable {
+                while !row.isFullyVisible(in: parentView) {
+                    parentView.swipeUp()
+                }
+                
                 return row
             }
             
@@ -215,3 +219,14 @@ public extension BaseUITestCase {
         }
     }
 }
+
+
+// MARK: - Extension Dependencies
+public extension XCUIElement {
+    func isFullyVisible(in parentView: XCUIElement) -> Bool {
+        let parentFrame = parentView.frame
+        let elementFrame = self.frame
+        return parentFrame.contains(elementFrame)
+    }
+}
+
