@@ -33,9 +33,9 @@ public extension XCTestCase {
     }
     
     func assertPropertyEquality<T: Equatable>(_ property: T?, name: String? = nil, expectedProperty: T, file: StaticString = #filePath, line: UInt = #line) {
-        assertProperty(property, name: name) { receivedProperty in
+        assertProperty(property, name: name, assertion: { receivedProperty in
             XCTAssertEqual(receivedProperty, expectedProperty, "\(receivedProperty) does not match expectation: \(expectedProperty)", file: file, line: line)
-        }
+        }, file: file, line: line)
     }
     
     func assertArray<T: Equatable>(_ array: [T], contains items: [T], file: StaticString = #filePath, line: UInt = #line) {
