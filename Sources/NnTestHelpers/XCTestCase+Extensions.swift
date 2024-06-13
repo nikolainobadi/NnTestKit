@@ -8,8 +8,8 @@
 import XCTest
 
 public extension XCTestCase {
-    func waitForAsyncMethod() async throws {
-        try await Task.sleep(nanoseconds: 0_010_000_000)
+    func waitForAsyncMethod(nanoseconds: UInt64 = 0_100_000_000) async throws {
+        try await Task.sleep(nanoseconds: nanoseconds)
     }
     
     func trackForMemoryLeaks(_ instance: AnyObject, file: StaticString = #filePath, line: UInt = #line) {
@@ -39,7 +39,6 @@ public extension XCTestCase {
     }
     
     func assertArray<T: Equatable>(_ array: [T], contains items: [T], file: StaticString = #filePath, line: UInt = #line) {
-        
         items.forEach {
             XCTAssertTrue(array.contains($0), "missing value: \($0)", file: file, line: line)
         }
