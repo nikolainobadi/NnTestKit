@@ -46,21 +46,24 @@ public extension XCTestCase {
     }
     
     func assertArray<T: Equatable>(_ array: [T], doesNotContain items: [T], file: StaticString = #filePath, line: UInt = #line) {
-        
         items.forEach {
             XCTAssertFalse(array.contains($0), "array should not contain \($0)", file: file, line: line)
         }
     }
     
     func assertNoErrorThrown(action: @escaping () throws -> Void, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
-        XCTAssertNoThrow(try action(), message ?? "unexpected error", file: file, line: line)
+        do {
+            try action()
+        } catch {
+            XCTFail(message ?? "unexpected error: \(error)", file: file, line: line)
+        }
     }
     
     func asyncAssertNoErrorThrown(action: @escaping () async throws -> Void, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) async {
         do {
             try await action()
         } catch {
-            XCTFail(message ?? "unexpected error", file: file, line: line)
+            XCTFail(message ?? "unexpected error: \(error)", file: file, line: line)
         }
     }
     
@@ -86,7 +89,7 @@ public extension XCTestCase {
     
     func handleError<ErrorType: Error & Equatable>(_ error: Error, expectedError: ErrorType, file: StaticString, line: UInt) {
         guard let receivedError = error as? ErrorType else {
-            XCTFail("unexpected error", file: file, line: line)
+            XCTFail("unexpected error: \(error)", file: file, line: line)
             return
         }
         

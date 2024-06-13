@@ -230,3 +230,24 @@ public extension XCUIElement {
     }
 }
 
+#if canImport(UIKit)
+public extension BaseUITestCase {
+    func selectDate(pickerId: String, currentMonth: String? = nil, currentYear: Int? = nil, newMonth: String? = nil, newDay: Int, file: StaticString = #filePath, line: UInt = #line) {
+        let picker = waitForElement(app.datePickers, id: pickerId)
+        picker.tap()
+        
+        if let currentMonth, let currentYear, let newMonth {
+            tapDatePickerMonthButton(month: currentMonth, year: currentYear)
+            app.datePickers.pickerWheels.element(boundBy: 0).adjust(toPickerWheelValue: newMonth)
+            tapDatePickerMonthButton(month: newMonth, year: currentYear)
+        }
+
+        app.datePickers.staticTexts["\(newDay)"].tap()
+        picker.tap()
+    }
+    
+    private func tapDatePickerMonthButton(month: String, year: Int, file: StaticString = #filePath, line: UInt = #line) {
+        waitForElement(app.datePickers.staticTexts, id: "\(month) \(year)").tap()
+    }
+}
+#endif
