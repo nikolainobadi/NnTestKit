@@ -185,23 +185,15 @@ public extension BaseUITestCase {
     /// - Parameters:
     ///   - row: The row element to delete.
     ///   - swipeButtonId: The identifier of the swipe button. Default is "Delete".
-    ///   - alertSheetButtonId: The identifier of the alert sheet button. Default is nil.
-    func deleteRow(row: XCUIElement, swipeButtonId: String = "Delete", alertSheetButtonId: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
+    ///   - withConfirmationAlert: A Boolean value indicating whether a confirmation alert should be handled. Default is false.
+    ///   - alertSheetButtonId: The identifier of the alert sheet button, relevant only if withConfirmationAlert is true. Default is nil, which means the swipeButtonId will be used.
+    func deleteRow(row: XCUIElement, swipeButtonId: String = "Delete", withConfirmationAlert: Bool = false, alertSheetButtonId: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
         row.swipeLeft()
         tapButton(swipeButtonId, file: file, line: line)
-        tapAlertSheetButton(alertSheetButtonId ?? swipeButtonId, file: file, line: line)
-    }
-
-    /// Deletes a row with the specified text and swipe button identifier.
-    /// - Parameters:
-    ///   - rowText: The text in the row to delete.
-    ///   - parentView: The parent view containing the row. Default is nil.
-    ///   - swipeButtonId: The identifier of the swipe button. Default is "Delete".
-    ///   - alertSheetButtonId: The identifier of the alert sheet button. Default is nil.
-    ///   - maxScrollAttempts: The maximum number of scroll attempts. Default is 3.
-    func deleteRow(rowText: String, parentView: XCUIElement? = nil, swipeButtonId: String = "Delete", alertSheetButtonId: String? = nil, maxScrollAttempts: Int = 3, file: StaticString = #filePath, line: UInt = #line) {
-        let row = getRowContainingText(parentView: parentView, text: rowText, maxScrollAttempts: maxScrollAttempts, isRequiredToExist: true, file: file, line: line)
-        deleteRow(row: row, swipeButtonId: swipeButtonId, alertSheetButtonId: alertSheetButtonId, file: file, line: line)
+        
+        if withConfirmationAlert {
+            tapAlertSheetButton(alertSheetButtonId ?? swipeButtonId, file: file, line: line)
+        }
     }
 
     /// Types text into a field with the specified identifier.
