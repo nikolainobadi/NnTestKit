@@ -203,7 +203,8 @@ public extension BaseUITestCase {
     ///   - text: The text to type.
     ///   - clearField: Whether to clear the field before typing. Default is false.
     ///   - shouldTapFieldBeforeTyping: Whether to tap the field before typing. Default is true.
-    func typeInField(fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false, shouldTapFieldBeforeTyping: Bool = true, file: StaticString = #filePath, line: UInt = #line) {
+    ///   - tapDoneButton: Whether to tap the Done button on the keyboard after typing. Default is false.
+    func typeInField(fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false, shouldTapFieldBeforeTyping: Bool = true, tapDoneButton: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
         let field = getField(fieldId: fieldId, isSecure: isSecure, file: file, line: line)
         if shouldTapFieldBeforeTyping {
             field.tap()
@@ -215,6 +216,10 @@ public extension BaseUITestCase {
             }
         }
         field.typeText(text)
+        
+        if tapDoneButton {
+            waitForElement(app.keyboards.buttons, id: "Done").tap()
+        }
     }
 
     /// Taps a button in a segmented control.
