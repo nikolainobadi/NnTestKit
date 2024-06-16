@@ -11,11 +11,16 @@ public let IS_TRUE = "IS_TRUE"
 public let IS_UI_TESTING = "IS_UI_TESTING"
 
 public extension ProcessInfo {
+    /// Indicates whether the app is running in a testing environment.
     static var isTesting: Bool {
         return processInfo.environment[IS_UI_TESTING] == IS_TRUE || NSClassFromString("XCTestCase") != nil
     }
     
+    /// Checks if a specified key is present in the environment variables.
+    /// - Parameter key: The key to check.
+    /// - Returns: `true` if the key is present, otherwise `false`.
     static func containsKey(_ key: String) -> Bool {
         return processInfo.environment[key] == IS_TRUE
     }
 }
+
