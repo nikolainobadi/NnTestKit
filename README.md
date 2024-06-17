@@ -1,6 +1,8 @@
 
 # NnTestKit
 
+![](https://badgen.net/badge/distro/SPM%20only?color=red)
+![Platform](https://badgen.net/badge/platform/iOS|macOS?color=grey)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Swift Version](https://img.shields.io/badge/Swift-5.9-orange.svg)](https://swift.org)
 
@@ -181,28 +183,94 @@ class MyUITests: BaseUITestCase {
 
 #### UI Action Helpers
 
+##### Date Picker Selection
+Easily change the date on a date picker. Currently, this method supports only changing selected day, or changing both the selected month and the selected day.
+
 ```swift
 class MyUITests: BaseUITestCase {
-    func testSelectDate() {
+    func testSelectDate_onlyChangeDay() {
         app.launch()
         let datePicker = waitForElement(app.datePickers, id: "myDatePicker")
         selectDate(picker: datePicker, dayNumberToSelect: 15)
+    }
+    
+    func testSelectDate_changeMonthAndDay) {
+        app.launch()
+        selectDate(pickerId: "myDatePicker", currentMonth: "June", newMonth: "January", newDay: 15)
+    }
+}
+```
+
+##### Row Selection
+Select a tableview/collectonView row (cell) based on the text it should contain.
+
+```swift
+class MyUITests: BaseUITestCase {
+    func testRowSelection() {
+        app.launch()
+        let row = getRowContainingText(parentViewId: "myCollectionView", text: "Row Text")
+        XCTAssertTrue(row.exists)
+    }
+}
+```
+
+##### Row Deletion
+Delete a tableview/collectionView row (cell) based on the text it should contain. If a confirmationDialgue is expected to display after attempting to delete the row, set withConfirmationAlert to true to tap the corresponding alertSheetButton.
+
+NOTE: By default, "Delete" will be used as the alertSheetButtonId when the value is nil. If you need to tap a different button, simply set alertSheetButtonId to the id of the button you want to press in the alert sheet. 
+```swift
+class MyUITests: BaseUITestCase {
+    func testDeleteRow_noConfirmationAlert() {
+        app.launch()
+        let row = getRowContainingText(parentViewId: "myCollectionView", text: "Row Text")
+        deleteRow(row: row)
+    }
+    
+    func testDeleteRow_withConfirmationAlert() {
+        app.launch()
+        let row = getRowContainingText(parentViewId: "myCollectionView", text: "Row Text")
+        deleteRow(row: row, swipeButtonId: "Delete", withConfirmationAlert: true, alertSheetButtonId: "ConfirmDelete")
+    }
+}
+```
+##### Third Party Alerts
+I'm going to be honest, this method can be a bit flaky. Unfortunatley dealing with third party alerts isn't as reliable as dealing with native iOS alerts. Still, if you need to tap a button on an alert presented by a third party, this is the method to use. 
+
+NOTE: Sometimes the app will need to be tapped in order to proceed. If you experience issues, toggle withAppTap and try again.
+```swift
+class MyUITests: BaseUITestCase {
+    func testWaitForThirdPartyAlert() {
+        app.launch()
+        waitForThirdPartyAlert(decription: ""“MyApp” Wants to Use “google.com” to Sign In"", button: "Cancel", withAppTap: true)
+        // Perform actions that trigger the third-party alert
+    }
+}
+```
+##### Type in textfield
+You can enter text in either a regular textfield or a secureField. You can clear the field text before typing, as well as tap the keyboard "Done" button when finished. 
+
+NOTE: By default, this method will tap the textfield before taking any action. If you expect the field to already be in focus, it may be best to set shouldTapFieldBeforeTyping to false to avoid problems.
+
+```swift
+class MyUITests: BaseUITestCase {
+    func testTypeInField() {
+        app.launch()
+        typeInField(fieldId: "username", text: "testUser")
+        
+        // Type text into a secure text field and clear it first
+        typeInField(fieldId: "password", isSecure: true, text: "password123", clearField: true)
+        
+        // Type text and tap the Done button after typing
+        typeInField(fieldId: "search", text: "query", tapDoneButton: true)
     }
 }
 ```
 
 ## Contributing
 
-I am a solo iOS developer and welcome any and all contributions. Feel free to fork the repository, make improvements, and submit a pull request.
+I am open to contributions! If you have ideas, enhancements, or bug fixes, feel free to [open an issue](https://github.com/nikolainobadi/NnTestKit/issues/new). Please ensure that your code adheres to the existing coding standards and includes appropriate documentation and tests.
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Contact
-
-For questions or suggestions, feel free to reach out via [GitHub Issues](https://github.com/nikolainobadi/NnTestKit/issues).
-
----
-
-Thank you for using NnTestKit! Your contributions and feedback are highly appreciated.
