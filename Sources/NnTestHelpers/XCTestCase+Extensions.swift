@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import Combine
 
 public extension XCTestCase {
     /// Pauses the execution of an asynchronous test for the specified duration.
@@ -24,6 +25,40 @@ public extension XCTestCase {
             print("checking for \(String(describing: instance))")
             XCTAssertNil(instance, "Instance should have been deallocated. Potential memory leak.", file: file, line: line)
         }
+    }
+    
+    /// Waits for a given Combine publisher to emit a value that satisfies a certain condition or until a timeout occurs.
+    ///
+    /// This function asynchronously waits for a publisher to emit a value that doesn't meet the `dropWhile` condition.
+    /// It sets up an expectation that is fulfilled once the publisher emits a qualifying value or the timeout is reached.
+    ///
+    /// - Parameters:
+    ///   - publisher: The Combine publisher to wait for.
+    ///   - dropWhile: A closure that takes an output value from the publisher and returns a Boolean value indicating whether to drop the value.
+    ///   - cancellables: A set to store any cancellables created within this method.
+    ///   - timeout: The time interval in seconds to wait before the function times out. Default is 5 seconds.
+    ///
+    /// - Note: This method assumes that the publisher's failure type is `Never`.
+    func waitForPublisher<P: Publisher>(publisher: P, dropWhile: @escaping (P.Output) -> Bool, cancellables: inout Set<AnyCancellable>, timeout: TimeInterval = 5) async where P.Failure == Never {
+        
+        // Create an expectation with a description for asynchronous waiting.
+        let exp = expectation(description: "waiting for publisher")
+        var didFinish = false
+
+        // Subscribe to the publisher, dropping values while `dropWhile` returns true.
+        publisher
+            .drop(while: dropWhile)
+            .sink { _ in
+                // Fulfill the expectation if a qualifying value is received.
+                if !didFinish {
+                    didFinish = true
+                    exp.fulfill()
+                }
+            }
+            .store(in: &cancellables)
+
+        // Wait for the expectation to be fulfilled or for the timeout to occur.
+        await fulfillment(of: [exp], timeout: timeout)
     }
 }
 
