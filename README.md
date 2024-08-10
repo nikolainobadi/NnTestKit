@@ -137,6 +137,8 @@ UI Tests are extremely powerful, but the recording process is often diappointing
 #### Setup Helpers
 Easily pass in any environment variables to be used in the app during UI tests. `IS_TRUE` is the default value, which simple sets the value of the passed in key to "true". `ProcessInfo` is extended to include a helper method to easily check for the existence of an `IS_TRUE` value within the environment.
 
+When UI testing, the environment variable `IS_UI_TESTING` is automatically passed into the environment. Like `ProcessInfo.isTesting`, `ProcessInfo.isUITesting` can be access by importing the smaller libarary `NnTestVariables` so it won't cause too much bloat if used in production.
+
 ```swift
 // App target 
 import SwiftUI
@@ -146,7 +148,11 @@ import NnTestVariables
 struct AppLauncher {
     static func main() throws {
         if ProcessInfo.isTesting {
-            TestApp.main()
+            if ProcessInfo.isUITesting {
+                TestApp.main()
+            } else {
+                Text("Running unit tests")
+            }
         } else {
             MyApp.main()
         }

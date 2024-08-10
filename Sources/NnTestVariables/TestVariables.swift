@@ -13,7 +13,12 @@ public let IS_UI_TESTING = "IS_UI_TESTING"
 public extension ProcessInfo {
     /// Indicates whether the app is running in a testing environment.
     static var isTesting: Bool {
-        return processInfo.environment[IS_UI_TESTING] == IS_TRUE || NSClassFromString("XCTestCase") != nil
+        return isUITesting || NSClassFromString("XCTestCase") != nil
+    }
+    
+    /// Indicates whether the app is running in a UI test environment.
+    static var isUITesting: Bool {
+        return processInfo.environment[IS_UI_TESTING] == IS_TRUE
     }
     
     /// Checks if a specified key is present in the environment variables.
