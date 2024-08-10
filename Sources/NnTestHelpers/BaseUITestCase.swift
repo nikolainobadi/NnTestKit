@@ -62,7 +62,13 @@ public extension BaseUITestCase {
         XCTAssertTrue(result == .completed, message ?? "\(name) should appear within \(timeout) seconds", file: file, line: line)
     }
     
-    func elementNotAppeared(_ query: XCUIElementQuery, named name: String, timeout: TimeInterval = 3, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
+    /// Waits for an element to disappear from the UI.
+    /// - Parameters:
+    ///   - query: The query to use for finding the element.
+    ///   - name: The name of the element.
+    ///   - timeout: The time to wait for the element to disappear. Default is 3 seconds.
+    ///   - message: The error message to use if the element does not disappear. Default is nil.
+    func elementNotAppeared(_ query: XCUIElementQuery, named name: String, timeout: TimeInterval = 2, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
         let element = query[name]
         let notExistsPredicate = NSPredicate(format: "exists == FALSE")
         let expectation = XCTNSPredicateExpectation(predicate: notExistsPredicate, object: element)
@@ -230,6 +236,14 @@ public extension BaseUITestCase {
         typeInField(field: field, text: text, clearField: clearField, tapFieldBeforeTypIng: tapFieldBeforeTyping, tapSubmitButon: tapSubmitButton, submitButtonText: submitButtonText, file: file, line: line)
     }
     
+    /// Types text into an alert's text field at the specified index.
+    /// - Parameters:
+    ///   - fieldIndex: The index of the text field in the alert. Default is 0.
+    ///   - text: The text to type.
+    ///   - clearField: Whether to clear the field before typing. Default is false.
+    ///   - tapFieldBeforeTyping: Whether to tap the field before typing. Default is true.
+    ///   - tapSubmitButton: Whether to tap the submit button on the keyboard after typing. Default is false.
+    ///   - submitButtonText: The text of the submit button. Default is "Done".
     func typeInAlertField(fieldIndex: Int = 0, text: String, clearField: Bool = false, tapFieldBeforeTyping: Bool = true, tapSubmitButton: Bool = false, submitButtonText: String = "Done", file: StaticString = #filePath, line: UInt = #line) {
         
         let field = app.alerts.textFields.element(boundBy: fieldIndex)
@@ -237,6 +251,14 @@ public extension BaseUITestCase {
         typeInField(field: field, text: text, clearField: clearField, tapFieldBeforeTypIng: tapFieldBeforeTyping, tapSubmitButon: tapSubmitButton, submitButtonText: submitButtonText, file: file, line: line)
     }
     
+    /// Types text into a specified field element.
+    /// - Parameters:
+    ///   - field: The field element to type into.
+    ///   - text: The text to type.
+    ///   - clearField: Whether to clear the field before typing. Default is false.
+    ///   - tapFieldBeforeTypIng: Whether to tap the field before typing. Default is true.
+    ///   - tapSubmitButon: Whether to tap the submit button on the keyboard after typing. Default is false.
+    ///   - submitButtonText: The text of the submit button. Default is "Done".
     func typeInField(field: XCUIElement, text: String, clearField: Bool = false, tapFieldBeforeTypIng: Bool = true, tapSubmitButon: Bool = false, submitButtonText: String = "Done", file: StaticString = #filePath, line: UInt = #line) {
         
         if tapFieldBeforeTypIng {
