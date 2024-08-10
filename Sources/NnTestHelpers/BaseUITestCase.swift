@@ -41,7 +41,9 @@ public extension BaseUITestCase {
     @discardableResult
     func waitForElement(_ query: XCUIElementQuery, id: String, timeout: TimeInterval = 3, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         let element = query[id]
+        
         elementAppeared(query, named: id, timeout: timeout, message, file: file, line: line)
+        
         return element
     }
     
@@ -56,7 +58,17 @@ public extension BaseUITestCase {
         let existsPredicate = NSPredicate(format: "exists == TRUE")
         let expectation = XCTNSPredicateExpectation(predicate: existsPredicate, object: element)
         let result = XCTWaiter.wait(for: [expectation], timeout: timeout)
+        
         XCTAssertTrue(result == .completed, message ?? "\(name) should appear within \(timeout) seconds", file: file, line: line)
+    }
+    
+    func elementNotAppeared(_ query: XCUIElementQuery, named name: String, timeout: TimeInterval = 3, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
+        let element = query[name]
+        let notExistsPredicate = NSPredicate(format: "exists == FALSE")
+        let expectation = XCTNSPredicateExpectation(predicate: notExistsPredicate, object: element)
+        let result = XCTWaiter.wait(for: [expectation], timeout: timeout)
+        
+        XCTAssertTrue(result == .completed, message ?? "\(name) should not appear within \(timeout) seconds", file: file, line: line)
     }
     
     /// Waits for and dismisses a third-party alert.
@@ -72,6 +84,7 @@ public extension BaseUITestCase {
             }
             return false
         }
+        
         if withAppTap {
             app.tap()
         }
@@ -87,6 +100,7 @@ public extension BaseUITestCase {
     @discardableResult
     func getRowContainingText(parentViewId: String, text: String, maxScrollAttempts: Int = 3, isRequiredToExist: Bool = false, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         let parentView = waitForElement(app.collectionViews, id: parentViewId, file: file, line: line)
+        
         return getRowContainingText(parentView: parentView, text: text, maxScrollAttempts: maxScrollAttempts, isRequiredToExist: isRequiredToExist, file: file, line: line)
     }
     
@@ -101,6 +115,7 @@ public extension BaseUITestCase {
     func getRowContainingText(parentView: XCUIElement? = nil, text: String, maxScrollAttempts: Int = 3, isRequiredToExist: Bool = false, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         var currentAttempt = 0
         let parentView = parentView ?? app.collectionViews.firstMatch
+        
         while currentAttempt < maxScrollAttempts {
             let row = parentView.cells.containing(.staticText, identifier: text).element
             if row.exists && row.isHittable {
@@ -112,9 +127,11 @@ public extension BaseUITestCase {
             parentView.swipeUp()
             currentAttempt += 1
         }
+        
         if isRequiredToExist {
             XCTFail("unable to find row with text \(text) after \(3) scroll attempts", file: file, line: line)
         }
+        
         return parentView.cells.containing(.staticText, identifier: text).element
     }
     
@@ -125,6 +142,7 @@ public extension BaseUITestCase {
     /// - Returns: The index of the row, or nil if not found.
     func getRowIndex(_ text: String, parentView: XCUIElement? = nil) -> Int? {
         let parentView = parentView ?? app.collectionViews.firstMatch
+        
         return parentView.cells.allElementsBoundByIndex.firstIndex(where: { $0.staticTexts[text].exists })
     }
 
@@ -163,6 +181,7 @@ public extension BaseUITestCase {
     ///   - message: The error message to use if the picker does not appear. Default is nil.
     func selectDate(pickerId: String, dayNumberToSelect: Int, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
         let picker = waitForElement(app.datePickers, id: pickerId, message, file: file, line: line)
+        
         selectDate(picker: picker, dayNumberToSelect: dayNumberToSelect)
     }
 
@@ -202,23 +221,39 @@ public extension BaseUITestCase {
     ///   - isSecure: Whether the field is a secure text field. Default is false.
     ///   - text: The text to type.
     ///   - clearField: Whether to clear the field before typing. Default is false.
-    ///   - shouldTapFieldBeforeTyping: Whether to tap the field before typing. Default is true.
-    ///   - tapDoneButton: Whether to tap the Done button on the keyboard after typing. Default is false.
-    func typeInField(fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false, shouldTapFieldBeforeTyping: Bool = true, tapDoneButton: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+    ///   - tapFieldBeforeTyping: Whether to tap the field before typing. Default is true.
+    ///   - tapDoneButton: Whether to tap the submit button on the keyboard after typing. Default is false.
+    ///   - submitButtonText: The text of the submit buttton to type. Default is 'Done'.
+    func typeInField(fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false, tapFieldBeforeTyping: Bool = true, tapSubmitButton: Bool = false, submitButtonText: String = "Done", file: StaticString = #filePath, line: UInt = #line) {
         let field = getField(fieldId: fieldId, isSecure: isSecure, file: file, line: line)
-        if shouldTapFieldBeforeTyping {
+        
+        typeInField(field: field, text: text, clearField: clearField, tapFieldBeforeTypIng: tapFieldBeforeTyping, tapSubmitButon: tapSubmitButton, submitButtonText: submitButtonText, file: file, line: line)
+    }
+    
+    func typeInAlertField(fieldIndex: Int = 0, text: String, clearField: Bool = false, tapFieldBeforeTyping: Bool = true, tapSubmitButton: Bool = false, submitButtonText: String = "Done", file: StaticString = #filePath, line: UInt = #line) {
+        
+        let field = app.alerts.textFields.element(boundBy: fieldIndex)
+        
+        typeInField(field: field, text: text, clearField: clearField, tapFieldBeforeTypIng: tapFieldBeforeTyping, tapSubmitButon: tapSubmitButton, submitButtonText: submitButtonText, file: file, line: line)
+    }
+    
+    func typeInField(field: XCUIElement, text: String, clearField: Bool = false, tapFieldBeforeTypIng: Bool = true, tapSubmitButon: Bool = false, submitButtonText: String = "Done", file: StaticString = #filePath, line: UInt = #line) {
+        
+        if tapFieldBeforeTypIng {
             field.tap()
         }
+        
         if clearField {
             if let stringValue = field.value as? String, !stringValue.isEmpty {
                 let deleteString = String(repeating: XCUIKeyboardKey.delete.rawValue, count: stringValue.count)
                 field.typeText(deleteString)
             }
         }
+        
         field.typeText(text)
         
-        if tapDoneButton {
-            waitForElement(app.keyboards.buttons, id: "Done").tap()
+        if tapSubmitButon {
+            waitForElement(app.keyboards.buttons, id: submitButtonText, file: file, line: line).tap()
         }
     }
 
@@ -229,6 +264,7 @@ public extension BaseUITestCase {
     ///   - buttonId: The identifier of the button to tap.
     func tapSegmentedControl(pickerId: String, query: XCUIElementQuery? = nil, buttonId: String, file: StaticString = #filePath, line: UInt = #line) {
         let picker = waitForElement(query ?? app.segmentedControls, id: pickerId, file: file, line: line)
+        
         picker.buttons[buttonId].tap()
     }
 }
@@ -250,7 +286,7 @@ public extension BaseUITestCase {
     ///   - date: The expected date.
     ///   - message: The error message to use if the dates do not match. Default is nil.
     func assertDateInPicker(_ datePicker: XCUIElement, date: Date, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
-        assertPropertyEquality(datePicker.buttons.firstMatch.value as? String, expectedProperty: date.asDatePickerString())
+        assertPropertyEquality(datePicker.buttons.firstMatch.value as? String, expectedProperty: date.asDatePickerString(), file: file, line: line)
     }
 
     /// Asserts that the text in a field matches the expected text.
@@ -268,6 +304,7 @@ public extension BaseUITestCase {
     ///   - isEnabled: Whether the button should be enabled.
     func assertButton(id: String, query: XCUIElementQuery? = nil, isEnabled: Bool, file: StaticString = #filePath, line: UInt = #line) {
         let button = waitForElement(query ?? app.buttons, id: id, file: file, line: line)
+        
         if isEnabled {
             XCTAssertTrue(button.isEnabled, "button \(id) should be enabled", file: file, line: line)
         } else {
@@ -282,22 +319,26 @@ public extension BaseUITestCase {
     ///   - currentSectionId: The identifier of the current section.
     ///   - nextSectionId: The identifier of the next section. Default is nil.
     func assertRowIndex(rowText: String, parentView: XCUIElement? = nil, currentSectionId: String, nextSectionId: String?, file: StaticString = #filePath, line: UInt = #line) {
-        // scroll to find row
-        getRowContainingText(parentView: parentView ?? app.collectionViews.firstMatch, text: rowText, isRequiredToExist: true)
+        getRowContainingText(parentView: parentView ?? app.collectionViews.firstMatch, text: rowText, isRequiredToExist: true, file: file, line: line)
+        
         guard let rowIndex = getRowIndex(rowText, parentView: parentView) else {
             XCTFail("unable to find index for \(rowText)", file: file, line: line)
             return
         }
+        
         guard let currentSectionIndex = getRowIndex(currentSectionId) else {
             XCTFail("unable to find index for currentSectionId \(currentSectionId)", file: file, line: line)
             return
         }
+        
         XCTAssertTrue(currentSectionIndex < rowIndex, "\(currentSectionIndex) should be less than \(rowIndex)", file: file, line: line)
+        
         if let nextSectionId {
             guard let nextSectionIndex = getRowIndex(nextSectionId) else {
                 XCTFail("unable to find index for nextSectionId \(nextSectionId)", file: file, line: line)
                 return
             }
+            
             XCTAssertTrue(rowIndex < nextSectionIndex, "\(rowIndex) should be less than \(nextSectionIndex)", file: file, line: line)
         }
     }
@@ -311,6 +352,7 @@ public extension XCUIElement {
     func isFullyVisible(in parentView: XCUIElement) -> Bool {
         let parentFrame = parentView.frame
         let elementFrame = self.frame
+        
         return parentFrame.contains(elementFrame)
     }
 }
@@ -325,13 +367,16 @@ public extension BaseUITestCase {
     ///   - newMonth: The new month to select. Default is nil.
     ///   - newDay: The day to select.
     func selectDate(pickerId: String, currentMonth: String? = nil, currentYear: Int? = nil, newMonth: String? = nil, newDay: Int, file: StaticString = #filePath, line: UInt = #line) {
-        let picker = waitForElement(app.datePickers, id: pickerId)
+        let picker = waitForElement(app.datePickers, id: pickerId, file: file, line: line)
+        
         picker.tap()
+        
         if let currentMonth, let currentYear, let newMonth {
-            tapDatePickerMonthButton(month: currentMonth, year: currentYear)
+            tapDatePickerMonthButton(month: currentMonth, year: currentYear, file: file, line: line)
             app.datePickers.pickerWheels.element(boundBy: 0).adjust(toPickerWheelValue: newMonth)
-            tapDatePickerMonthButton(month: newMonth, year: currentYear)
+            tapDatePickerMonthButton(month: newMonth, year: currentYear, file: file, line: line)
         }
+        
         app.datePickers.staticTexts["\(newDay)"].tap()
         picker.tap()
     }
@@ -341,7 +386,7 @@ public extension BaseUITestCase {
     ///   - month: The month to select.
     ///   - year: The year to select.
     private func tapDatePickerMonthButton(month: String, year: Int, file: StaticString = #filePath, line: UInt = #line) {
-        waitForElement(app.datePickers.staticTexts, id: "\(month) \(year)").tap()
+        waitForElement(app.datePickers.staticTexts, id: "\(month) \(year)", file: file, line: line).tap()
     }
 }
 #endif
