@@ -15,6 +15,12 @@ public extension XCTestCase {
         try await Task.sleep(nanoseconds: nanoseconds)
     }
     
+    /// Pauses the execution of an asynchronous test for the specified duration.
+    /// - Parameter seconds: The number of seconds to pause. Default is 0.1 seconds.
+    func waitForAsyncMethod(seconds: Double = 0.1) async throws {
+        try await waitForAsyncMethod(nanoseconds: .init(seconds * 1_000_000_000))
+    }
+    
     /// Tracks the specified instance for memory leaks and fails the test if the instance is not deallocated.
     /// - Parameters:
     ///   - instance: The instance to track.
@@ -27,40 +33,50 @@ public extension XCTestCase {
         }
     }
     
-    /// Waits for a given Combine publisher to emit a value that satisfies a certain condition or until a timeout occurs.
-    ///
-    /// This function asynchronously waits for a publisher to emit a value that doesn't meet the `dropWhile` condition.
-    /// It sets up an expectation that is fulfilled once the publisher emits a qualifying value or the timeout is reached.
-    ///
+    /// Waits for a specific condition to be met from a publisher's output.
     /// - Parameters:
-    ///   - publisher: The Combine publisher to wait for.
-    ///   - dropWhile: A closure that takes an output value from the publisher and returns a Boolean value indicating whether to drop the value.
-    ///   - cancellables: A set to store any cancellables created within this method.
-    ///   - timeout: The time interval in seconds to wait before the function times out. Default is 5 seconds.
+    ///   - publisher: The publisher to subscribe to.
+    ///   - description: A description for the expectation. Default is "waiting for publisher".
+    ///   - cancellables: A set of `AnyCancellable` to store the subscription.
+    ///   - timeout: The time to wait for the condition to be met. Default is 3 seconds.
+    ///   - condition: A closure that takes the publisher's output and returns `true` if the condition is met.
     ///
-    /// - Note: This method assumes that the publisher's failure type is `Never`.
-    func waitForPublisher<P: Publisher>(publisher: P, dropWhile: @escaping (P.Output) -> Bool, cancellables: inout Set<AnyCancellable>, timeout: TimeInterval = 5) async where P.Failure == Never {
+    /// # Example Usage:
+    /// ```swift
+    /// let publisher = Just(42).delay(for: .seconds(1), scheduler: RunLoop.main)
+    /// var cancellables = Set<AnyCancellable>()
+    ///
+    /// waitForCondition(publisher: publisher, cancellables: &cancellables) { output in
+    ///     return output == 42
+    /// }
+    /// ```
+    /// In this example, the test waits for the `Just` publisher to emit the value `42`.
+    /// The condition is met when the output is `42`, and the test will continue after this condition is fulfilled.
+    func waitForCondition<P: Publisher>(
+        publisher: P,
+        description: String = "waiting for publisher",
+        cancellables: inout Set<AnyCancellable>,
+        timeout: TimeInterval = 3,
+        condition: @escaping (P.Output) -> Bool
+    ) {
+        let expectation = XCTestExpectation(description: description)
         
-        // Create an expectation with a description for asynchronous waiting.
-        let exp = expectation(description: "waiting for publisher")
-        var didFinish = false
-
-        // Subscribe to the publisher, dropping values while `dropWhile` returns true.
         publisher
-            .drop(while: dropWhile)
-            .sink { _ in
-                // Fulfill the expectation if a qualifying value is received.
-                if !didFinish {
-                    didFinish = true
-                    exp.fulfill()
+            .sink { completion in
+                if case .failure(let error) = completion {
+                    XCTFail("Publisher failed with error: \(error)")
+                }
+            } receiveValue: { newValue in
+                if condition(newValue) {
+                    expectation.fulfill()
                 }
             }
             .store(in: &cancellables)
-
-        // Wait for the expectation to be fulfilled or for the timeout to occur.
-        await fulfillment(of: [exp], timeout: timeout)
+        
+        wait(for: [expectation], timeout: timeout)
     }
 }
+
 
 // MARK: - Assertion Helpers
 public extension XCTestCase {
@@ -71,12 +87,13 @@ public extension XCTestCase {
     ///   - assertion: The custom assertion to perform.
     ///   - file: The file name to be used in the assertion. Default is the current file.
     ///   - line: The line number to be used in the assertion. Default is the current line.
-    func assertProperty<T>(_ property: T?, name: String? = nil, assertion: (T) -> Void, file: StaticString = #filePath, line: UInt = #line) {
+    func assertProperty<T>(_ property: T?, name: String? = nil, assertion: ((T) -> Void)? = nil, file: StaticString = #filePath, line: UInt = #line) {
         guard let property else {
             XCTFail("expected \(name ?? "value") but found nil", file: file, line: line)
             return
         }
-        assertion(property)
+        
+        assertion?(property)
     }
 
     /// Asserts that a property equals an expected value.
@@ -110,6 +127,30 @@ public extension XCTestCase {
     ///   - line: The line number to be used in the assertion. Default is the current line.
     func assertArray<T: Equatable>(_ array: [T], doesNotContain items: [T], file: StaticString = #filePath, line: UInt = #line) {
         items.forEach { XCTAssertFalse(array.contains($0), "array should not contain \($0)", file: file, line: line) }
+    }
+    
+    /// Asserts that an array contains the specified items based on their `id`.
+    /// - Parameters:
+    ///   - array: The array to assert.
+    ///   - items: The items that the array should contain.
+    ///   - file: The file name to be used in the assertion. Default is the current file.
+    ///   - line: The line number to be used in the assertion. Default is the current line.
+    func assertIdentifiableArray<T: Identifiable>(_ array: [T], contains items: [T], file: StaticString = #filePath, line: UInt = #line) {
+        items.forEach { item in
+            XCTAssertTrue(array.contains(where: { $0.id == item.id }), "missing item with id: \(item.id)", file: file, line: line)
+        }
+    }
+
+    /// Asserts that an array does not contain the specified items based on their `id`.
+    /// - Parameters:
+    ///   - array: The array to assert.
+    ///   - items: The items that the array should not contain.
+    ///   - file: The file name to be used in the assertion. Default is the current file.
+    ///   - line: The line number to be used in the assertion. Default is the current line.
+    func assertIdentifiableArray<T: Identifiable>(_ array: [T], doesNotContain items: [T], file: StaticString = #filePath, line: UInt = #line) {
+        items.forEach { item in
+            XCTAssertFalse(array.contains(where: { $0.id == item.id }), "array should not contain item with id: \(item.id)", file: file, line: line)
+        }
     }
 
     /// Asserts that no error is thrown during the execution of the specified action.
@@ -146,12 +187,15 @@ public extension XCTestCase {
     ///   - action: The action to execute.
     ///   - file: The file name to be used in the assertion. Default is the current file.
     ///   - line: The line number to be used in the assertion. Default is the current line.
-    func assertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType, action: @escaping () throws -> Void, file: StaticString = #filePath, line: UInt = #line) {
+    func assertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType? = nil, action: @escaping () throws -> Void, file: StaticString = #filePath, line: UInt = #line) {
         do {
             try action()
+            
             XCTFail("expected an error but none were thrown", file: file, line: line)
         } catch {
-            handleError(error, expectedError: expectedError, file: file, line: line)
+            if let expectedError {
+                handleError(error, expectedError: expectedError, file: file, line: line)
+            }
         }
     }
 
@@ -161,12 +205,15 @@ public extension XCTestCase {
     ///   - action: The asynchronous action to execute.
     ///   - file: The file name to be used in the assertion. Default is the current file.
     ///   - line: The line number to be used in the assertion. Default is the current line.
-    func asyncAssertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType, action: @escaping () async throws -> Void, file: StaticString = #filePath, line: UInt = #line) async {
+    func asyncAssertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType? = nil, action: @escaping () async throws -> Void, file: StaticString = #filePath, line: UInt = #line) async {
         do {
             try await action()
+            
             XCTFail("expected an error but none were thrown", file: file, line: line)
         } catch {
-            handleError(error, expectedError: expectedError, file: file, line: line)
+            if let expectedError {
+                handleError(error, expectedError: expectedError, file: file, line: line)
+            }
         }
     }
 
@@ -181,6 +228,7 @@ public extension XCTestCase {
             XCTFail("unexpected error: \(error)", file: file, line: line)
             return
         }
+        
         XCTAssertEqual(receivedError, expectedError, "\(receivedError) does not match expected error: \(expectedError)", file: file, line: line)
     }
 }
