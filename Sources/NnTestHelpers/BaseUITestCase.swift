@@ -29,6 +29,23 @@ public extension BaseUITestCase {
     }
 }
 
+
+// MARK: - TestData Helpers
+public extension BaseUITestCase {
+    func makeRandomEmail() -> String {
+        return "\(getRandomNumber())tester\(getRandomNumber())\(getRandomNumber())@gmail.com"
+    }
+    
+    func makeRandomUsername() -> String {
+        return "tester\(getRandomNumber())\(getRandomNumber())\(getRandomNumber())"
+    }
+    
+    func getRandomNumber() -> Int {
+        return Int.random(in: 0...9)
+    }
+}
+
+
 // MARK: - UI Element Helpers
 public extension BaseUITestCase {
     /// Waits for an element to appear and returns it.
