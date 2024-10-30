@@ -23,7 +23,7 @@ To add NnTestKit to your Xcode project, add the following dependency to your `Pa
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/nikolainobadi/NnTestKit", branch: "main")
+    .package(url: "https://github.com/nikolainobadi/NnTestKit", from: "1.1.0")
 ]
 ```
 
