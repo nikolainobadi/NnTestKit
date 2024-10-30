@@ -24,8 +24,6 @@ public extension XCTestCase {
     /// Tracks the specified instance for memory leaks and fails the test if the instance is not deallocated.
     /// - Parameters:
     ///   - instance: The instance to track.
-    ///   - file: The file name to be used in the assertion. Default is the current file.
-    ///   - line: The line number to be used in the assertion. Default is the current line.
     func trackForMemoryLeaks(_ instance: AnyObject, file: StaticString = #filePath, line: UInt = #line) {
         addTeardownBlock { [weak instance] in
             print("checking for \(String(describing: instance))")
@@ -37,6 +35,7 @@ public extension XCTestCase {
     /// - Parameters:
     ///   - publisher: The publisher to subscribe to.
     ///   - description: A description for the expectation. Default is "waiting for publisher".
+    ///   - shouldFailIfConditionIsMet: A Boolean value indicating whether the expectation should fail if the condition is met. If `true`, the test will fail when the condition is fulfilled. Default is `false`.
     ///   - cancellables: A set of `AnyCancellable` to store the subscription.
     ///   - timeout: The time to wait for the condition to be met. Default is 3 seconds.
     ///   - condition: A closure that takes the publisher's output and returns `true` if the condition is met.
@@ -87,8 +86,6 @@ public extension XCTestCase {
     ///   - property: The property to assert.
     ///   - name: The name of the property for error messages. Default is nil.
     ///   - assertion: The custom assertion to perform.
-    ///   - file: The file name to be used in the assertion. Default is the current file.
-    ///   - line: The line number to be used in the assertion. Default is the current line.
     func assertProperty<T>(_ property: T?, name: String? = nil, assertion: ((T) -> Void)? = nil, file: StaticString = #filePath, line: UInt = #line) {
         guard let property else {
             XCTFail("expected \(name ?? "value") but found nil", file: file, line: line)
@@ -103,8 +100,6 @@ public extension XCTestCase {
     ///   - property: The property to assert.
     ///   - name: The name of the property for error messages. Default is nil.
     ///   - expectedProperty: The expected value of the property.
-    ///   - file: The file name to be used in the assertion. Default is the current file.
-    ///   - line: The line number to be used in the assertion. Default is the current line.
     func assertPropertyEquality<T: Equatable>(_ property: T?, name: String? = nil, expectedProperty: T, file: StaticString = #filePath, line: UInt = #line) {
         assertProperty(property, name: name, assertion: { receivedProperty in
             XCTAssertEqual(receivedProperty, expectedProperty, "\(receivedProperty) does not match expectation: \(expectedProperty)", file: file, line: line)
@@ -125,8 +120,6 @@ public extension XCTestCase {
     /// - Parameters:
     ///   - array: The array to assert.
     ///   - items: The items that the array should not contain.
-    ///   - file: The file name to be used in the assertion. Default is the current file.
-    ///   - line: The line number to be used in the assertion. Default is the current line.
     func assertArray<T: Equatable>(_ array: [T], doesNotContain items: [T], file: StaticString = #filePath, line: UInt = #line) {
         items.forEach { XCTAssertFalse(array.contains($0), "array should not contain \($0)", file: file, line: line) }
     }
@@ -135,8 +128,6 @@ public extension XCTestCase {
     /// - Parameters:
     ///   - array: The array to assert.
     ///   - items: The items that the array should contain.
-    ///   - file: The file name to be used in the assertion. Default is the current file.
-    ///   - line: The line number to be used in the assertion. Default is the current line.
     func assertIdentifiableArray<T: Identifiable>(_ array: [T], contains items: [T], file: StaticString = #filePath, line: UInt = #line) {
         items.forEach { item in
             XCTAssertTrue(array.contains(where: { $0.id == item.id }), "missing item with id: \(item.id)", file: file, line: line)
@@ -159,8 +150,6 @@ public extension XCTestCase {
     /// - Parameters:
     ///   - action: The action to execute.
     ///   - message: The error message to be used if an error is thrown. Default is nil.
-    ///   - file: The file name to be used in the assertion. Default is the current file.
-    ///   - line: The line number to be used in the assertion. Default is the current line.
     func assertNoErrorThrown(action: @escaping () throws -> Void, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
         do {
             try action()
@@ -185,14 +174,11 @@ public extension XCTestCase {
 
     /// Asserts that an expected error is thrown during the execution of the specified action.
     /// - Parameters:
-    ///   - expectedError: The expected error to be thrown.
+    ///   - expectedError: The expected error to be thrown. Default is `StubErrorType.genericError`, which allows any thrown error to be treated as unexpected unless specified.
     ///   - action: The action to execute.
-    ///   - file: The file name to be used in the assertion. Default is the current file.
-    ///   - line: The line number to be used in the assertion. Default is the current line.
     func assertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType = StubErrorType.genericError, action: @escaping () throws -> Void, file: StaticString = #filePath, line: UInt = #line) {
         do {
             try action()
-            
             XCTFail("expected an error but none were thrown", file: file, line: line)
         } catch {
             if expectedError as? StubErrorType != nil {
@@ -205,14 +191,11 @@ public extension XCTestCase {
 
     /// Asserts asynchronously that an expected error is thrown during the execution of the specified action.
     /// - Parameters:
-    ///   - expectedError: The expected error to be thrown.
+    ///   - expectedError: The expected error to be thrown. Default is `StubErrorType.genericError`, which allows any thrown error to be treated as unexpected unless specified.
     ///   - action: The asynchronous action to execute.
-    ///   - file: The file name to be used in the assertion. Default is the current file.
-    ///   - line: The line number to be used in the assertion. Default is the current line.
     func asyncAssertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType = StubErrorType.genericError, action: @escaping () async throws -> Void, file: StaticString = #filePath, line: UInt = #line) async {
         do {
             try await action()
-            
             XCTFail("expected an error but none were thrown", file: file, line: line)
         } catch {
             if expectedError as? StubErrorType != nil {
@@ -222,13 +205,11 @@ public extension XCTestCase {
             }
         }
     }
-
+    
     /// Handles errors during assertion, checking if the received error matches the expected error.
     /// - Parameters:
     ///   - error: The received error.
     ///   - expectedError: The expected error.
-    ///   - file: The file name to be used in the assertion. Default is the current file.
-    ///   - line: The line number to be used in the assertion. Default is the current line.
     func handleError<ErrorType: Error & Equatable>(_ error: Error, expectedError: ErrorType, file: StaticString, line: UInt) {
         guard let receivedError = error as? ErrorType else {
             XCTFail("unexpected error: \(error)", file: file, line: line)

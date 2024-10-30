@@ -32,14 +32,20 @@ public extension BaseUITestCase {
 
 // MARK: - TestData Helpers
 public extension BaseUITestCase {
+    /// Generates a random email address in the format `<randomNumber>tester<randomNumber><randomNumber>@gmail.com`.
+    /// - Returns: A randomly generated email address as a `String`.
     func makeRandomEmail() -> String {
         return "\(getRandomNumber())tester\(getRandomNumber())\(getRandomNumber())@gmail.com"
     }
-    
+
+    /// Generates a random username in the format `tester<randomNumber><randomNumber><randomNumber>`.
+    /// - Returns: A randomly generated username as a `String`.
     func makeRandomUsername() -> String {
         return "tester\(getRandomNumber())\(getRandomNumber())\(getRandomNumber())"
     }
-    
+
+    /// Generates a random single-digit number between 0 and 9.
+    /// - Returns: A random integer between 0 and 9.
     func getRandomNumber() -> Int {
         return Int.random(in: 0...9)
     }
@@ -223,8 +229,11 @@ public extension BaseUITestCase {
         waitForElement(query ?? app.buttons, id: name, file: file, line: line).tap()
     }
     
+    /// Taps a specified button in an alert if it exists.
+    /// - Parameters:
+    ///   - buttonId: The identifier for the alert button to tap. Default is "Ok".
     func tapAlertButton(buttonId: String = "Ok", file: StaticString = #filePath, line: UInt = #line) {
-        app.alerts.buttons[buttonId].tap()
+        waitForElement(app.alerts.buttons, id: buttonId, file: file, line: line).tap()
     }
 
     /// Deletes a row with the specified element and swipe button identifier.
@@ -309,6 +318,20 @@ public extension BaseUITestCase {
         let picker = waitForElement(query ?? app.segmentedControls, id: pickerId, file: file, line: line)
         
         picker.buttons[buttonId].tap()
+    }
+    
+    /// Adjusts the value of a stepper control by either incrementing or decrementing it a specified number of times.
+    /// - Parameters:
+    ///   - id: The identifier for the stepper control to interact with.
+    ///   - isIncrementing: A Boolean indicating whether to increment (`true`) or decrement (`false`) the stepper value.
+    ///   - count: The number of times to tap the stepper button. Default is 1.
+    func adjustStepper(id: String, isIncrementing: Bool, count: Int = 1, file: StaticString = #filePath, line: UInt = #line) {
+        let stepper = waitForElement(app.steppers, id: id, file: file, line: line)
+        let buttonId = "\(id)-\(isIncrementing ? "Increment" : "Decrement")"
+                
+        for _ in 0..<count {
+            stepper.buttons[buttonId].tap()
+        }
     }
 }
 
