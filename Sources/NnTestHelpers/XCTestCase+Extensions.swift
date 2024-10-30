@@ -11,14 +11,14 @@ import Combine
 public extension XCTestCase {
     /// Pauses the execution of an asynchronous test for the specified duration.
     /// - Parameter nanoseconds: The number of nanoseconds to pause. Default is 0.1 seconds.
-    func waitForAsyncMethod(nanoseconds: UInt64 = 0_100_000_000) async throws {
+    func waitForAsyncMethodInNanoseconds(_ nanoseconds: UInt64 = 0_100_000_000) async throws {
         try await Task.sleep(nanoseconds: nanoseconds)
     }
     
     /// Pauses the execution of an asynchronous test for the specified duration.
     /// - Parameter seconds: The number of seconds to pause. Default is 0.1 seconds.
     func waitForAsyncMethod(seconds: Double = 0.1) async throws {
-        try await waitForAsyncMethod(nanoseconds: .init(seconds * 1_000_000_000))
+        try await waitForAsyncMethodInNanoseconds(.init(seconds * 1_000_000_000))
     }
     
     /// Tracks the specified instance for memory leaks and fails the test if the instance is not deallocated.
@@ -55,11 +55,13 @@ public extension XCTestCase {
     func waitForCondition<P: Publisher>(
         publisher: P,
         description: String = "waiting for publisher",
+        shouldFailIfConditionIsMet: Bool = false,
         cancellables: inout Set<AnyCancellable>,
         timeout: TimeInterval = 3,
         condition: @escaping (P.Output) -> Bool
     ) {
         let expectation = XCTestExpectation(description: description)
+        expectation.isInverted = shouldFailIfConditionIsMet
         
         publisher
             .sink { completion in
@@ -187,13 +189,15 @@ public extension XCTestCase {
     ///   - action: The action to execute.
     ///   - file: The file name to be used in the assertion. Default is the current file.
     ///   - line: The line number to be used in the assertion. Default is the current line.
-    func assertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType? = nil, action: @escaping () throws -> Void, file: StaticString = #filePath, line: UInt = #line) {
+    func assertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType = StubErrorType.genericError, action: @escaping () throws -> Void, file: StaticString = #filePath, line: UInt = #line) {
         do {
             try action()
             
             XCTFail("expected an error but none were thrown", file: file, line: line)
         } catch {
-            if let expectedError {
+            if expectedError as? StubErrorType != nil {
+                XCTFail("unexpected error: \(error.localizedDescription)", file: file, line: line)
+            } else {
                 handleError(error, expectedError: expectedError, file: file, line: line)
             }
         }
@@ -205,13 +209,15 @@ public extension XCTestCase {
     ///   - action: The asynchronous action to execute.
     ///   - file: The file name to be used in the assertion. Default is the current file.
     ///   - line: The line number to be used in the assertion. Default is the current line.
-    func asyncAssertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType? = nil, action: @escaping () async throws -> Void, file: StaticString = #filePath, line: UInt = #line) async {
+    func asyncAssertThrownError<ErrorType: Error & Equatable>(expectedError: ErrorType = StubErrorType.genericError, action: @escaping () async throws -> Void, file: StaticString = #filePath, line: UInt = #line) async {
         do {
             try await action()
             
             XCTFail("expected an error but none were thrown", file: file, line: line)
         } catch {
-            if let expectedError {
+            if expectedError as? StubErrorType != nil {
+                XCTFail("unexpected error: \(error.localizedDescription)", file: file, line: line)
+            } else {
                 handleError(error, expectedError: expectedError, file: file, line: line)
             }
         }
@@ -231,4 +237,10 @@ public extension XCTestCase {
         
         XCTAssertEqual(receivedError, expectedError, "\(receivedError) does not match expected error: \(expectedError)", file: file, line: line)
     }
+}
+
+
+// MARK: - Helper Enum
+public enum StubErrorType: Error {
+    case genericError
 }

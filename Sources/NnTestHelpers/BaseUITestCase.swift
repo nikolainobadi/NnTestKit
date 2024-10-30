@@ -205,6 +205,10 @@ public extension BaseUITestCase {
     func tapButton(_ name: String, query: XCUIElementQuery? = nil, file: StaticString = #filePath, line: UInt = #line) {
         waitForElement(query ?? app.buttons, id: name, file: file, line: line).tap()
     }
+    
+    func tapAlertButton(buttonId: String = "Ok", file: StaticString = #filePath, line: UInt = #line) {
+        app.alerts.buttons[buttonId].tap()
+    }
 
     /// Deletes a row with the specified element and swipe button identifier.
     /// - Parameters:
