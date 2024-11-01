@@ -57,7 +57,9 @@ public extension XCTestCase {
         shouldFailIfConditionIsMet: Bool = false,
         cancellables: inout Set<AnyCancellable>,
         timeout: TimeInterval = 3,
-        condition: @escaping (P.Output) -> Bool
+        condition: @escaping (P.Output) -> Bool,
+        file: StaticString = #filePath,
+        line: UInt = #line
     ) {
         let expectation = XCTestExpectation(description: description)
         expectation.isInverted = shouldFailIfConditionIsMet
@@ -65,7 +67,7 @@ public extension XCTestCase {
         publisher
             .sink { completion in
                 if case .failure(let error) = completion {
-                    XCTFail("Publisher failed with error: \(error)")
+                    XCTFail("Publisher failed with error: \(error)", file: file, line: line)
                 }
             } receiveValue: { newValue in
                 if condition(newValue) {
@@ -73,8 +75,25 @@ public extension XCTestCase {
                 }
             }
             .store(in: &cancellables)
+         
+        let result = XCTWaiter().wait(for: [expectation], timeout: timeout)
         
-        wait(for: [expectation], timeout: timeout)
+        evaluateWaitResult(result, isInverted: shouldFailIfConditionIsMet, timeout: timeout, file: file, line: line)
+    }
+    
+    private func evaluateWaitResult(_ result: XCTWaiter.Result, isInverted: Bool, timeout: TimeInterval, file: StaticString, line: UInt) {
+        switch (result, isInverted) {
+        case (.invertedFulfillment, true), (.completed, false):
+            break
+        case (.timedOut, false):
+            XCTFail("Condition was not met within \(timeout) seconds", file: file, line: line)
+        case (.interrupted, _):
+            XCTFail("Test was interrupted before completion", file: file, line: line)
+        case (.incorrectOrder, _):
+            XCTFail("Expectations were fulfilled in the incorrect order", file: file, line: line)
+        default:
+            XCTFail("An unknown result occurred", file: file, line: line)
+        }
     }
 }
 
