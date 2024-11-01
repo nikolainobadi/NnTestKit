@@ -57,7 +57,9 @@ public extension XCTestCase {
         shouldFailIfConditionIsMet: Bool = false,
         cancellables: inout Set<AnyCancellable>,
         timeout: TimeInterval = 3,
-        condition: @escaping (P.Output) -> Bool
+        condition: @escaping (P.Output) -> Bool,
+        file: StaticString = #filePath,
+        line: UInt = #line
     ) {
         let expectation = XCTestExpectation(description: description)
         expectation.isInverted = shouldFailIfConditionIsMet
@@ -65,7 +67,7 @@ public extension XCTestCase {
         publisher
             .sink { completion in
                 if case .failure(let error) = completion {
-                    XCTFail("Publisher failed with error: \(error)")
+                    XCTFail("Publisher failed with error: \(error)", file: file, line: line)
                 }
             } receiveValue: { newValue in
                 if condition(newValue) {
@@ -73,8 +75,14 @@ public extension XCTestCase {
                 }
             }
             .store(in: &cancellables)
+         
+        let result = XCTWaiter().wait(for: [expectation], timeout: timeout)
         
-        wait(for: [expectation], timeout: timeout)
+        if shouldFailIfConditionIsMet {
+            XCTAssertEqual(result, .timedOut, "Condition was met unexpectedly within \(timeout) seconds", file: file, line: line)
+        } else {
+            XCTAssertEqual(result, .completed, "Condition not met within \(timeout) seconds", file: file, line: line)
+        }
     }
 }
 
