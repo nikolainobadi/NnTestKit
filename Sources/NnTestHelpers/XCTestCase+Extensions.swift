@@ -78,10 +78,21 @@ public extension XCTestCase {
          
         let result = XCTWaiter().wait(for: [expectation], timeout: timeout)
         
-        if shouldFailIfConditionIsMet {
-            XCTAssertEqual(result, .timedOut, "Condition was met unexpectedly within \(timeout) seconds", file: file, line: line)
-        } else {
-            XCTAssertEqual(result, .completed, "Condition not met within \(timeout) seconds", file: file, line: line)
+        evaluateWaitResult(result, isInverted: shouldFailIfConditionIsMet, timeout: timeout, file: file, line: line)
+    }
+    
+    private func evaluateWaitResult(_ result: XCTWaiter.Result, isInverted: Bool, timeout: TimeInterval, file: StaticString, line: UInt) {
+        switch (result, isInverted) {
+        case (.invertedFulfillment, true), (.completed, false):
+            break
+        case (.timedOut, false):
+            XCTFail("Condition was not met within \(timeout) seconds", file: file, line: line)
+        case (.interrupted, _):
+            XCTFail("Test was interrupted before completion", file: file, line: line)
+        case (.incorrectOrder, _):
+            XCTFail("Expectations were fulfilled in the incorrect order", file: file, line: line)
+        default:
+            XCTFail("An unknown result occurred", file: file, line: line)
         }
     }
 }
