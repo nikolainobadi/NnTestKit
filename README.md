@@ -30,10 +30,10 @@ dependencies: [
 Then, add `NnTestKit` to your target dependencies:
 
 ```swift
-.target(
-    name: "YourTargetName",
-    dependencies: ["NnTestKit"]
-)
+dependencies: [
+    .product(name: "NnTestHelpers", package: "NnTestKit"),
+    .product(name: "NnTestVariables", package: "NnTestKit")
+]
 ```
 ## Usage
 
