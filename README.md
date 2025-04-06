@@ -19,11 +19,11 @@ NOTE: All test helper methods are located in the NnTestHelpers libary, which sho
 
 ## Installation
 
-To add NnTestKit to your Xcode project, add the following dependency to your `Package.swift` file:
+To add `NnTestKit` to your Xcode project, add the following dependency to your `Package.swift` file:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/nikolainobadi/NnTestKit", from: "1.1.0")
+    .package(url: "https://github.com/nikolainobadi/NnTestKit", from: "1.0.0")
 ]
 ```
 
@@ -51,6 +51,32 @@ class MyTests: XCTestCase {
         // Your test code here
     }
 }
+```
+
+### Swift Testing Framework – Memory Leak Tracking
+
+For users leveraging Swift's [Testing framework](https://github.com/apple/swift-testing), `NnTestKit` includes a dedicated `TrackingMemoryLeaks` class to help detect retain cycles and other memory leaks.
+
+This works similarly to `addTeardownBlock` in `XCTestCase`, but takes advantage of `deinit` to assert that all tracked objects are deallocated when the test instance is destroyed.
+
+> Inspired by [Chris Downie's article on detecting memory leaks with Swift Testing](https://medium.com/@chris_34161/detecting-memory-leaks-with-apple-s-new-swift-testing-framework-b058f515385c).
+
+```swift
+import Testing
+@testable import MyModule
+
+final class MyClassSwiftTesting: TrackingMemoryLeaks {
+    @Test("MyClass leaks memory due to retain cycle")
+    func test_memoryLeakDetected() {
+        let _ = makeSUT()
+    }
+    
+    private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
+        let service = MyService()
+        let sut = MyClass(service: service)
+        trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
+        return sut
+    }
 ```
 
 #### Property Assertions
