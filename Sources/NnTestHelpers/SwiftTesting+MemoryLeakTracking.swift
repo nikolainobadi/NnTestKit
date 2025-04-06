@@ -34,6 +34,8 @@ import Testing
 /// ```
 open class TrackingMemoryLeaks {
     private var trackingList: [TrackableObject] = []
+    
+    public init() { }
 
     /// On deinitialization—similar to using `addTeardownBlock` in `XCTestCase`—this asserts that all tracked objects have been deallocated.
     /// If any object is still in memory at teardown, the test fails with a descriptive message and the source location where tracking was initiated.
