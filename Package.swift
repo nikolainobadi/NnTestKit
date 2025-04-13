@@ -9,24 +9,13 @@ let package = Package(
         .iOS(.v13), .macOS(.v10_15)
     ],
     products: [
-        .library(
-            name: "NnTestHelpers",
-            targets: ["NnTestHelpers"]
-        ),
-        .library(
-            name: "NnTestVariables",
-            targets: ["NnTestVariables"]
-        ),
+        .library(name: "NnTestHelpers", targets: ["NnTestHelpers"]),
+        .library(name: "NnTestVariables", targets: ["NnTestVariables"]),
+        .library(name: "NnSwiftTestingHelpers", targets: ["NnSwiftTestingHelpers"])
     ],
     targets: [
-        .target(
-            name: "NnTestVariables"
-        ),
-        .target(
-            name: "NnTestHelpers",
-            dependencies: [
-                "NnTestVariables"
-            ]
-        )
+        .target(name: "NnTestVariables"),
+        .target(name: "NnSwiftTestingHelpers"),
+        .target(name: "NnTestHelpers", dependencies: ["NnTestVariables"])
     ]
 )
