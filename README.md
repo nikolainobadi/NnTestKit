@@ -1,10 +1,9 @@
 
 # NnTestKit
 
-![](https://badgen.net/badge/distro/SPM%20only?color=red)
-![Platform](https://badgen.net/badge/platform/iOS|macOS?color=grey)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Swift Version](https://img.shields.io/badge/Swift-5.5-orange.svg)](https://swift.org)
+![Platform](https://badgen.net/badge/platform/iOS%2015%2B%20%7C%20macOS%2012%2B/blue)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 NnTestKit is a Swift package that provides a collection of helper methods to simplify unit and UI testing in your iOS projects. It extends XCTest to offer more convenient and powerful assertion methods, memory leak tracking, and UI testing utilities.
 
@@ -32,7 +31,8 @@ Then, add `NnTestKit` to your target dependencies:
 ```swift
 dependencies: [
     .product(name: "NnTestHelpers", package: "NnTestKit"),
-    .product(name: "NnTestVariables", package: "NnTestKit")
+    .product(name: "NnTestVariables", package: "NnTestKit"),
+    .product(name: "NnSwiftTestingHelpers", package: "NnTestKit")
 ]
 ```
 ## Usage
