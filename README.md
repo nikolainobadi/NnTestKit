@@ -305,4 +305,3 @@ I am open to contributions! If you have ideas, enhancements, or bug fixes, feel 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
