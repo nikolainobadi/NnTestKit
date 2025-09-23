@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2025-09-23
+### Added
+- New `@LeakTracked` macro for memory leak detection without inheritance requirement
+- Swift macros support through new `NnTestKitMacros` library
+- Comprehensive documentation for `@LeakTracked` macro with migration guide from deprecated `TrackingMemoryLeaks`
+
+### Changed
+- Deprecated `TrackingMemoryLeaks` class in favor of `@LeakTracked` macro for better Sendable conformance
+
+### Fixed
+- Swift 6 concurrency warnings with `@MainActor` annotation on `BaseUITestCase`
+- Combine import concurrency warning with `@preconcurrency` attribute
+
 ## [1.3.0] - 2025-01-14
 ### Added
 - Combine testing support with new `CombineHelpers` for testing `@Published` properties

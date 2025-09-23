@@ -1,20 +1,21 @@
 
 # NnTestKit
 
-[![Swift Version](https://img.shields.io/badge/Swift-5.5-orange.svg)](https://swift.org)
+[![Swift Version](https://img.shields.io/badge/Swift-5.10%2B-orange.svg)](https://swift.org)
 ![Platform](https://badgen.net/badge/platform/iOS%2015%2B%20%7C%20macOS%2012%2B/blue)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-NnTestKit is a Swift package that provides a collection of helper methods to simplify unit and UI testing in your iOS projects. It extends XCTest to offer more convenient and powerful assertion methods, memory leak tracking, and UI testing utilities.
+NnTestKit is a Swift package that provides a collection of helper methods to simplify unit and UI testing in your iOS projects. It extends XCTest and Swift Testing frameworks to offer more convenient and powerful assertion methods, memory leak tracking with modern Swift macros, and UI testing utilities.
 
-NOTE: All test helper methods are located in the NnTestHelpers libary, which should only be included as a dependency in test targets. NnTestVariables is a much smaller library and only contains a few properties and extensions to assit with testing. The idea is that its significantly smaller size shouldn't cause any problems when added as a dependency in production targets.
+NOTE: All test helper methods are located in the NnTestHelpers library, which should only be included as a dependency in test targets. NnTestVariables is a much smaller library and only contains a few properties and extensions to assist with testing. The NnSwiftTestingHelpers and NnTestKitMacros libraries provide Swift Testing framework support with modern macro-based memory leak detection.
 
 ## Features
-- Memory leak tracking
+- Memory leak tracking with modern `@LeakTracked` macro (Swift 5.10+)
 - Property and array assertions
-- Error handling assertions
-- Date extensions for testing
+- Error handling assertions (sync and async)
+- Swift Testing framework support
 - UI test case setup and helper methods
+- Swift 6 concurrency compatibility
 
 ## Installation
 
@@ -22,7 +23,7 @@ To add `NnTestKit` to your Xcode project, add the following dependency to your `
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/nikolainobadi/NnTestKit", from: "1.0.0")
+    .package(url: "https://github.com/nikolainobadi/NnTestKit", from: "1.4.0")
 ]
 ```
 
@@ -32,7 +33,8 @@ Then, add `NnTestKit` to your target dependencies:
 dependencies: [
     .product(name: "NnTestHelpers", package: "NnTestKit"),
     .product(name: "NnTestVariables", package: "NnTestKit"),
-    .product(name: "NnSwiftTestingHelpers", package: "NnTestKit")
+    .product(name: "NnSwiftTestingHelpers", package: "NnTestKit"),
+    .product(name: "NnTestKitMacros", package: "NnTestKit") // For @LeakTracked macro
 ]
 ```
 ## Usage
@@ -55,29 +57,58 @@ class MyTests: XCTestCase {
 
 ### Swift Testing Framework – Memory Leak Tracking
 
-For users leveraging Swift's [Testing framework](https://github.com/apple/swift-testing), `NnTestKit` includes a dedicated `TrackingMemoryLeaks` class to help detect retain cycles and other memory leaks.
+#### @LeakTracked Macro (Recommended)
 
-This works similarly to `addTeardownBlock` in `XCTestCase`, but takes advantage of `deinit` to assert that all tracked objects are deallocated when the test instance is destroyed.
+For Swift 5.10+, use the modern `@LeakTracked` macro for memory leak detection without inheritance:
 
-> Inspired by [Chris Downie's article on detecting memory leaks with Swift Testing](https://medium.com/@chris_34161/detecting-memory-leaks-with-apple-s-new-swift-testing-framework-b058f515385c).
+```swift
+import Testing
+@testable import MyModule
+
+@LeakTracked
+struct MyTestSuite {
+    @Test("MyClass deallocates properly")
+    func test_memoryLeakDetected() {
+        let sut = makeSUT()
+        // Test operations...
+    }
+
+    private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
+        let service = MyService()
+        let sut = MyClass(service: service)
+        trackForMemoryLeaks(service, fileID: fileID, filePath: filePath, line: line, column: column)
+        trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
+        return sut
+    }
+}
+```
+
+#### TrackingMemoryLeaks Class (Legacy)
+
+**Deprecated**: For users still using the legacy approach, `NnTestKit` includes a `TrackingMemoryLeaks` class:
 
 ```swift
 import Testing
 @testable import MyModule
 
 final class MyClassSwiftTesting: TrackingMemoryLeaks {
-    @Test("MyClass leaks memory due to retain cycle")
+    @Test("MyClass deallocates properly")
     func test_memoryLeakDetected() {
-        let _ = makeSUT()
+        let sut = makeSUT()
+        // Test operations...
     }
-    
+
     private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
         let service = MyService()
         let sut = MyClass(service: service)
+        trackForMemoryLeaks(service, fileID: fileID, filePath: filePath, line: line, column: column)
         trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
         return sut
     }
+}
 ```
+
+> Note: The `@LeakTracked` macro provides better Swift 6 concurrency support and eliminates the need for inheritance.
 
 #### Property Assertions
 
@@ -297,6 +328,13 @@ class MyUITests: BaseUITestCase {
     }
 }
 ```
+
+## Swift 6 Compatibility
+
+NnTestKit is fully compatible with Swift 6's strict concurrency checking:
+- `@MainActor` annotations on UI testing components
+- `@preconcurrency` imports for Combine framework compatibility
+- Thread-safe memory leak tracking implementation
 
 ## Contributing
 
