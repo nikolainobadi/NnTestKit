@@ -9,6 +9,25 @@ NnTestKit is a Swift package that provides a collection of helper methods to sim
 
 NOTE: All test helper methods are located in the NnTestHelpers library, which should only be included as a dependency in test targets. NnTestVariables is a much smaller library and only contains a few properties and extensions to assist with testing. The NnSwiftTestingHelpers and NnTestKitMacros libraries provide Swift Testing framework support with modern macro-based memory leak detection.
 
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Swift Testing Framework – Memory Leak Tracking](#swift-testing-framework--memory-leak-tracking)
+    - [@LeakTracked Macro (Recommended)](#leaktracked-macro-recommended)
+    - [TrackingMemoryLeaks Class (Legacy)](#trackingmemoryleaks-class-legacy)
+  - [XCTestCase Extensions](#xctestcase-extensions)
+    - [Memory Leak Tracking](#memory-leak-tracking)
+    - [Property Assertions](#property-assertions)
+  - [BaseUITestCase (UI Test Helpers)](#baseuittestcase)
+    - [Setup Helpers](#setup-helpers)
+    - [UI Element Helpers](#ui-element-helpers)
+    - [UI Action Helpers](#ui-action-helpers)
+- [Swift 6 Compatibility](#swift-6-compatibility)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Features
 - Memory leak tracking with modern `@LeakTracked` macro (Swift 5.10+)
 - Property and array assertions
@@ -22,9 +41,7 @@ NOTE: All test helper methods are located in the NnTestHelpers library, which sh
 To add `NnTestKit` to your Xcode project, add the following dependency to your `Package.swift` file:
 
 ```swift
-dependencies: [
-    .package(url: "https://github.com/nikolainobadi/NnTestKit", from: "1.4.0")
-]
+.package(url: "https://github.com/nikolainobadi/NnTestKit", from: "1.4.0")
 ```
 
 Then, add `NnTestKit` to your target dependencies:
@@ -38,22 +55,6 @@ dependencies: [
 ]
 ```
 ## Usage
-
-### XCTestCase Extensions
-
-NnTestKit extends `XCTestCase` with several useful methods:
-
-#### Memory Leak Tracking
-Prevent memory leaks before they infect your code by passing the object you want to track into this method before running your unit tests. This method ensures the object in question is dellocated by the end of the test eles the test will fail.
-```swift
-class MyTests: XCTestCase {
-    func testMemoryLeak() {
-        let instance = MyClass()
-        trackForMemoryLeaks(instance)
-        // Your test code here
-    }
-}
-```
 
 ### Swift Testing Framework – Memory Leak Tracking
 
@@ -109,6 +110,22 @@ final class MyClassSwiftTesting: TrackingMemoryLeaks {
 ```
 
 > Note: The `@LeakTracked` macro provides better Swift 6 concurrency support and eliminates the need for inheritance.
+
+### XCTestCase Extensions
+
+NnTestKit extends `XCTestCase` with several useful methods:
+
+#### Memory Leak Tracking
+Prevent memory leaks before they infect your code by passing the object you want to track into this method before running your unit tests. This method ensures the object in question is dellocated by the end of the test eles the test will fail.
+```swift
+class MyTests: XCTestCase {
+    func testMemoryLeak() {
+        let instance = MyClass()
+        trackForMemoryLeaks(instance)
+        // Your test code here
+    }
+}
+```
 
 #### Property Assertions
 
