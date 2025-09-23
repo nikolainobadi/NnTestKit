@@ -18,48 +18,70 @@ import Testing
 ///
 /// ## Usage
 ///
-/// Apply the macro to your test suite:
+/// Apply the macro to your test suite and use the `makeSUT` factory pattern:
 /// ```swift
 /// @LeakTracked
 /// struct MyTestSuite {
 ///     @Test("Verify no memory leaks")
 ///     func test_objectDeallocates() {
-///         let object = MyClass()
-///         trackForMemoryLeaks(object)  // Will fail if object leaks
+///         let sut = makeSUT()
+///         // Test operations...
+///     }
+///
+///     private func makeSUT(
+///         fileID: String = #fileID,
+///         filePath: String = #filePath,
+///         line: Int = #line,
+///         column: Int = #column
+///     ) -> MyClass {
+///         let sut = MyClass()
+///         trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
+///         return sut
 ///     }
 /// }
 /// ```
 ///
 /// ## Behavior Modes
 ///
-/// The macro supports three leak detection behaviors:
+/// The macro supports three leak detection behaviors that can be specified in your `makeSUT` method:
 ///
 /// ### `.failIfLeaked` (Default)
 /// Fails the test if a tracked object is not deallocated:
 /// ```swift
-/// trackForMemoryLeaks(object)  // Fails on leak
-/// trackForMemoryLeaks(object, behavior: .failIfLeaked)  // Explicit
+/// private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
+///     let sut = MyClass()
+///     trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)  // Default: fails on leak
+///     return sut
+/// }
 /// ```
 ///
 /// ### `.warnIfLeaked`
 /// Logs a warning but doesn't fail the test:
 /// ```swift
-/// trackForMemoryLeaks(object, behavior: .warnIfLeaked)
+/// private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
+///     let sut = MyClass()
+///     trackForMemoryLeaks(sut, behavior: .warnIfLeaked, fileID: fileID, filePath: filePath, line: line, column: column)
+///     return sut
+/// }
 /// ```
 ///
 /// ### `.expectLeak`
 /// Fails if the object IS deallocated (useful for testing retain cycles):
 /// ```swift
-/// trackForMemoryLeaks(object, behavior: .expectLeak)
+/// private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
+///     let sut = MyClass()
+///     trackForMemoryLeaks(sut, behavior: .expectLeak, fileID: fileID, filePath: filePath, line: line, column: column)
+///     return sut
+/// }
 /// ```
 ///
-/// ## Factory Method Pattern
+/// ## Tracking Multiple Objects
 ///
-/// Common pattern for system under test (SUT) creation:
+/// When your SUT has dependencies, track them all in the `makeSUT` method:
 /// ```swift
 /// @LeakTracked
 /// struct ViewModelTests {
-///     @Test("ViewModel deallocates properly")
+///     @Test("ViewModel and dependencies deallocate properly")
 ///     func test_viewModelLifecycle() {
 ///         let sut = makeSUT()
 ///         // Test operations...
@@ -72,10 +94,12 @@ import Testing
 ///         column: Int = #column
 ///     ) -> ViewModel {
 ///         let service = MockService()
-///         let sut = ViewModel(service: service)
+///         let repository = MockRepository()
+///         let sut = ViewModel(service: service, repository: repository)
 ///
-///         // Track both objects
+///         // Track all objects that should be deallocated
 ///         trackForMemoryLeaks(service, fileID: fileID, filePath: filePath, line: line, column: column)
+///         trackForMemoryLeaks(repository, fileID: fileID, filePath: filePath, line: line, column: column)
 ///         trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
 ///
 ///         return sut
@@ -91,8 +115,14 @@ import Testing
 /// ```swift
 /// final class MyTests: TrackingMemoryLeaks {
 ///     @Test func test_example() {
-///         let object = MyClass()
-///         trackForMemoryLeaks(object)
+///         let sut = makeSUT()
+///         // Test operations...
+///     }
+///
+///     private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
+///         let sut = MyClass()
+///         trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
+///         return sut
 ///     }
 /// }
 /// ```
@@ -102,8 +132,14 @@ import Testing
 /// @LeakTracked
 /// struct MyTests {
 ///     @Test func test_example() {
-///         let object = MyClass()
-///         trackForMemoryLeaks(object)
+///         let sut = makeSUT()
+///         // Test operations...
+///     }
+///
+///     private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
+///         let sut = MyClass()
+///         trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
+///         return sut
 ///     }
 /// }
 /// ```

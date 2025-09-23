@@ -19,16 +19,16 @@ import Testing
 /// @testable import YourModule
 ///
 /// final class MyClassSwiftTesting: TrackingMemoryLeaks {
-///     @Test("MyClass leaks memory due to retain cycle")
+///     @Test("MyClass deallocates properly")
 ///     func test_memoryLeakDetected() {
-///         let _ = makeSUT()
+///         let sut = makeSUT()
+///         // Test operations...
 ///     }
-/// }
 ///
-/// private extension MyClassSwiftTesting {
-///     func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
+///     private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
 ///         let service = MyService()
 ///         let sut = MyClass(service: service)
+///         trackForMemoryLeaks(service, fileID: fileID, filePath: filePath, line: line, column: column)
 ///         trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
 ///         return sut
 ///     }
@@ -39,14 +39,16 @@ import Testing
 /// ```swift
 /// @LeakTracked
 /// struct MyTestSuite {
-///     @Test("MyClass leaks memory due to retain cycle")
+///     @Test("MyClass deallocates properly")
 ///     func test_memoryLeakDetected() {
-///         let _ = makeSUT()
+///         let sut = makeSUT()
+///         // Test operations...
 ///     }
 ///
 ///     private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
 ///         let service = MyService()
 ///         let sut = MyClass(service: service)
+///         trackForMemoryLeaks(service, fileID: fileID, filePath: filePath, line: line, column: column)
 ///         trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
 ///         return sut
 ///     }
