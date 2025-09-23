@@ -10,7 +10,10 @@ import Testing
 /// A utility class to track objects for memory leaks in tests using Swift's `Testing` framework.
 /// When the instance of this class is deallocated, it verifies that all tracked objects have also been deallocated.
 ///
-/// ## Example
+/// **Deprecated**: Consider using the new `@LeakTracked` macro instead, which provides the same functionality
+/// without requiring inheritance and automatically handles Sendable conformance issues.
+///
+/// ## Traditional Usage (Deprecated)
 /// ```swift
 /// import Testing
 /// @testable import YourModule
@@ -19,7 +22,6 @@ import Testing
 ///     @Test("MyClass leaks memory due to retain cycle")
 ///     func test_memoryLeakDetected() {
 ///         let _ = makeSUT()
-///
 ///     }
 /// }
 ///
@@ -32,6 +34,25 @@ import Testing
 ///     }
 /// }
 /// ```
+///
+/// ## New Usage with @LeakTracked Macro
+/// ```swift
+/// @LeakTracked
+/// struct MyTestSuite {
+///     @Test("MyClass leaks memory due to retain cycle")
+///     func test_memoryLeakDetected() {
+///         let _ = makeSUT()
+///     }
+///
+///     private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
+///         let service = MyService()
+///         let sut = MyClass(service: service)
+///         trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
+///         return sut
+///     }
+/// }
+/// ```
+@available(*, deprecated, message: "Use @LeakTracked macro instead for better Sendable conformance and no inheritance requirement")
 open class TrackingMemoryLeaks {
     private var trackingList: [TrackableObject] = []
     
@@ -53,31 +74,6 @@ open class TrackingMemoryLeaks {
     ///   - line: The line number where the tracking is set. Default is the current line.
     ///   - column: The column number where the tracking is set. Default is the current column.
     public func trackForMemoryLeaks(_ ref: AnyObject, fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) {
-        trackingList.append(.init(weakRef: ref, sourceLocation: .init(fileID: fileID, filePath: filePath, line: line, column: column)))
-    }
-}
-
-
-// MARK: - Dependencies
-
-/// A lightweight wrapper used to hold a weak reference and its source location for memory leak tracking.
-final class TrackableObject {
-    /// A weak reference to the tracked object. Should be nil when deallocated.
-    weak var weakRef: AnyObject?
-
-    /// A descriptive error message shown if the object is not deallocated.
-    let errorMessage: String
-
-    /// The location in the source code where the object was tracked.
-    let sourceLocation: SourceLocation
-
-    /// Initializes a new `TrackableObject` instance.
-    /// - Parameters:
-    ///   - weakRef: The object to track (stored weakly).
-    ///   - sourceLocation: The source code location where the object is being tracked.
-    init(weakRef: AnyObject, sourceLocation: SourceLocation) {
-        self.weakRef = weakRef
-        self.sourceLocation = sourceLocation
-        self.errorMessage = "\(String(describing: weakRef)) should have been deallocated. Potential memory leak"
+        trackingList.append(TrackableObject(weakRef: ref, sourceLocation: .init(fileID: fileID, filePath: filePath, line: line, column: column)))
     }
 }
