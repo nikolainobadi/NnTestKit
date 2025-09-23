@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import Combine
+@preconcurrency import Combine
 
 public extension XCTestCase {
     /// Pauses the execution of an asynchronous test for the specified duration.
