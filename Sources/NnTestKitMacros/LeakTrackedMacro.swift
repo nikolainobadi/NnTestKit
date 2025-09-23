@@ -10,13 +10,47 @@ import SwiftSyntaxMacros
 import SwiftSyntaxBuilder
 import SwiftCompilerPlugin
 
+/// Implementation of the `@LeakTracked` macro that generates memory leak tracking code.
+///
+/// This macro injects the following into the decorated type:
+/// 1. An enum defining leak detection behaviors
+/// 2. Thread-safe storage for tracked objects
+/// 3. A public API method `trackForMemoryLeaks`
+/// 4. A `deinit` that validates all tracked objects were deallocated
+///
+/// ## Generated Code Structure
+///
+/// The macro generates:
+/// - `_NnLeakBehavior` enum with three modes: `.failIfLeaked`, `.warnIfLeaked`, `.expectLeak`
+/// - `_nn_lock` (NSLock) and `_nn_tracked` array for thread-safe object tracking
+/// - `trackForMemoryLeaks(_:behavior:fileID:filePath:line:column:)` public method
+/// - `deinit` implementation that checks all tracked objects based on their behavior
+///
+/// ## Thread Safety
+///
+/// Uses NSLock to synchronize access to the tracking array, ensuring thread-safe
+/// operation in concurrent test execution environments.
+///
+/// ## Implementation Notes
+///
+/// - The generated code uses Testing framework's `#expect` for assertions
+/// - Source locations are preserved from the call site for accurate error reporting
+/// - The `deinit` runs assertions appropriate to each object's configured behavior
 public struct LeakTrackedMacro: MemberMacro {
+    /// Expands the macro to generate memory leak tracking functionality.
+    ///
+    /// - Parameters:
+    ///   - node: The attribute syntax node representing the macro application
+    ///   - decl: The declaration group (struct/class) being decorated
+    ///   - context: The macro expansion context
+    /// - Returns: Array of generated declarations to inject into the type
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf decl: some DeclGroupSyntax,
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
 
+        // Behavior enum for configuring how each tracked object should be validated
         let behaviorEnum: DeclSyntax =
         """
         public enum _NnLeakBehavior {
@@ -26,12 +60,14 @@ public struct LeakTrackedMacro: MemberMacro {
         }
         """
 
+        // Thread-safe storage for tracked objects and their behaviors
         let storage: DeclSyntax =
         """
         private var _nn_lock = Foundation.NSLock()
         private var _nn_tracked: [(object: TrackableObject, behavior: _NnLeakBehavior)] = []
         """
 
+        // Public API method for tracking objects for memory leaks
         let apiMain: DeclSyntax =
         """
         @discardableResult
@@ -57,6 +93,7 @@ public struct LeakTrackedMacro: MemberMacro {
         }
         """
 
+        // Deinit implementation that validates all tracked objects based on their behavior
         let deinitDecl: DeclSyntax =
         """
         deinit {
