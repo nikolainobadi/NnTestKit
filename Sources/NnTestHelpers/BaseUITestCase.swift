@@ -8,6 +8,7 @@
 import XCTest
 import NnTestVariables
 
+@MainActor
 open class BaseUITestCase: XCTestCase {
     public let app = XCUIApplication()
     
