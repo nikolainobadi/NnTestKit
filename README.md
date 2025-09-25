@@ -61,12 +61,18 @@ dependencies: [
 
 For Swift 5.10+, use the modern `@LeakTracked` macro for memory leak detection without inheritance:
 
+**Important Requirements:**
+- The test suite **must be a class** (not a struct) as the macro generates a `deinit` method
+- Most useful when testing **class instances** that need deallocation tracking
+- Reference types (classes) are tracked; value types (structs) don't need leak tracking
+
 ```swift
 import Testing
+import NnSwiftTestingHelpers
 @testable import MyModule
 
 @LeakTracked
-final class MyTestSuite {
+final class MyTestSuite {  // Must be a class, not a struct
     @Test("MyClass deallocates properly")
     func test_memoryLeakDetected() {
         let sut = makeSUT()
@@ -74,8 +80,8 @@ final class MyTestSuite {
     }
 
     private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
-        let service = MyService()
-        let sut = MyClass(service: service)
+        let service = MyService()  // Assuming MyService is a class
+        let sut = MyClass(service: service)  // Assuming MyClass is a class
         trackForMemoryLeaks(service, fileID: fileID, filePath: filePath, line: line, column: column)
         trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
         return sut
@@ -89,6 +95,7 @@ final class MyTestSuite {
 
 ```swift
 import Testing
+import NnSwiftTestingHelpers
 @testable import MyModule
 
 final class MyClassSwiftTesting: TrackingMemoryLeaks {
@@ -117,6 +124,9 @@ NnTestKit extends `XCTestCase` with several useful methods:
 #### Memory Leak Tracking
 Prevent memory leaks before they infect your code by passing the object you want to track into this method before running your unit tests. This method ensures the object in question is dellocated by the end of the test eles the test will fail.
 ```swift
+import XCTest
+import NnTestHelpers
+
 final class MyTests: XCTestCase {
     func testMemoryLeak() {
         let instance = MyClass()
@@ -131,6 +141,9 @@ final class MyTests: XCTestCase {
 ##### Assert Optional Properties
 Use this method when you want to ensure a propery is not nil, then make any extra assertions you may want to check.
 ```swift
+import XCTest
+import NnTestHelpers
+
 final class MyTests: XCTestCase {
     func testProperty() {
         let sut = makeSUT()
@@ -142,6 +155,9 @@ final class MyTests: XCTestCase {
 ```
 If you just want to compare the optional value to an expected property, assertPropertyEquality does the trick.
 ```swift
+import XCTest
+import NnTestHelpers
+
 final class MyTests: XCTestCase {
     func testPropertyEquality() {
         let sut = makeSUT()
@@ -155,6 +171,9 @@ final class MyTests: XCTestCase {
 ##### Assert Array Contains Items
 Easily check for the existence of any type or Equatable data.
 ```swift
+import XCTest
+import NnTestHelpers
+
 final class MyTests: XCTestCase {
     func testArrayContainsItems() {
         let array = [1, 2, 3, 4, 5]
@@ -167,6 +186,9 @@ final class MyTests: XCTestCase {
 Yes, XCTAssertNoThrow alreAdy exists, but it doesn't allow you to pass in file: StaticString = #filePath, line: UInt = #line as arguments, which is kind of a dealbreaker for me. This method solves that problem, so using it nested in another helper method will still allow you to track the exact file/line where the error occurs. And there's an async-friendly version of this method as well.
 
 ```swift
+import XCTest
+import NnTestHelpers
+
 final class MyTests: XCTestCase {
     func testNoErrorThrown() {
         assertNoErrorThrown {
@@ -186,6 +208,9 @@ final class MyTests: XCTestCase {
 Same as the previous method, this just accepts file: StaticString = #filePath, line: UInt = #line as optional arguments to better track the failures. And there's an async-friendly version of this method as well.
 
 ```swift
+import XCTest
+import NnTestHelpers
+
 enum MyCustomError: Error {
     case invalidInput
 }
@@ -250,6 +275,9 @@ final class MyUITests: BaseUITestCase {
 BaseUITestCase already contains an instance of XCUIApplication for you to access, stored in the `app` property. Use it to easily launch the app or to compose the XCUIElementQuery needed to find a UI element.
 
 ```swift
+import XCTest
+import NnTestHelpers
+
 final class MyUITests: BaseUITestCase {
     func testWaitForElement() {
         app.launch()
@@ -266,6 +294,9 @@ final class MyUITests: BaseUITestCase {
 Easily change the date on a date picker. Currently, this method supports only changing selected day, or changing both the selected month and the selected day.
 
 ```swift
+import XCTest
+import NnTestHelpers
+
 final class MyUITests: BaseUITestCase {
     func testSelectDate_onlyChangeDay() {
         app.launch()
@@ -284,6 +315,9 @@ final class MyUITests: BaseUITestCase {
 Select a tableview/collectonView row (cell) based on the text it should contain.
 
 ```swift
+import XCTest
+import NnTestHelpers
+
 final class MyUITests: BaseUITestCase {
     func testRowSelection() {
         app.launch()
@@ -298,6 +332,9 @@ Delete a tableview/collectionView row (cell) based on the text it should contain
 
 NOTE: By default, "Delete" will be used as the alertSheetButtonId when the value is nil. If you need to tap a different button, simply set alertSheetButtonId to the id of the button you want to press in the alert sheet. 
 ```swift
+import XCTest
+import NnTestHelpers
+
 final class MyUITests: BaseUITestCase {
     func testDeleteRow_noConfirmationAlert() {
         app.launch()
@@ -317,6 +354,9 @@ I'm going to be honest, this method can be a bit flaky. Unfortunatley dealing wi
 
 NOTE: Sometimes the app will need to be tapped in order to proceed. If you experience issues, toggle withAppTap and try again.
 ```swift
+import XCTest
+import NnTestHelpers
+
 final class MyUITests: BaseUITestCase {
     func testWaitForThirdPartyAlert() {
         app.launch()
@@ -331,6 +371,9 @@ You can enter text in either a regular textfield or a secureField. You can clear
 NOTE: By default, this method will tap the textfield before taking any action. If you expect the field to already be in focus, it may be best to set shouldTapFieldBeforeTyping to false to avoid problems.
 
 ```swift
+import XCTest
+import NnTestHelpers
+
 final class MyUITests: BaseUITestCase {
     func testTypeInField() {
         app.launch()
