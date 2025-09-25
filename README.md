@@ -50,8 +50,7 @@ Then, add `NnTestKit` to your target dependencies:
 dependencies: [
     .product(name: "NnTestHelpers", package: "NnTestKit"),
     .product(name: "NnTestVariables", package: "NnTestKit"),
-    .product(name: "NnSwiftTestingHelpers", package: "NnTestKit"),
-    .product(name: "NnTestKitMacros", package: "NnTestKit") // For @LeakTracked macro
+    .product(name: "NnSwiftTestingHelpers", package: "NnTestKit")
 ]
 ```
 ## Usage
@@ -67,7 +66,7 @@ import Testing
 @testable import MyModule
 
 @LeakTracked
-struct MyTestSuite {
+final class MyTestSuite {
     @Test("MyClass deallocates properly")
     func test_memoryLeakDetected() {
         let sut = makeSUT()
@@ -118,7 +117,7 @@ NnTestKit extends `XCTestCase` with several useful methods:
 #### Memory Leak Tracking
 Prevent memory leaks before they infect your code by passing the object you want to track into this method before running your unit tests. This method ensures the object in question is dellocated by the end of the test eles the test will fail.
 ```swift
-class MyTests: XCTestCase {
+final class MyTests: XCTestCase {
     func testMemoryLeak() {
         let instance = MyClass()
         trackForMemoryLeaks(instance)
@@ -132,7 +131,7 @@ class MyTests: XCTestCase {
 ##### Assert Optional Properties
 Use this method when you want to ensure a propery is not nil, then make any extra assertions you may want to check.
 ```swift
-class MyTests: XCTestCase {
+final class MyTests: XCTestCase {
     func testProperty() {
         let sut = makeSUT()
         let value = sut.methodToCreateIntValue()
@@ -143,7 +142,7 @@ class MyTests: XCTestCase {
 ```
 If you just want to compare the optional value to an expected property, assertPropertyEquality does the trick.
 ```swift
-class MyTests: XCTestCase {
+final class MyTests: XCTestCase {
     func testPropertyEquality() {
         let sut = makeSUT()
         let value = sut.methodToCreateIntValue()
@@ -156,7 +155,7 @@ class MyTests: XCTestCase {
 ##### Assert Array Contains Items
 Easily check for the existence of any type or Equatable data.
 ```swift
-class MyTests: XCTestCase {
+final class MyTests: XCTestCase {
     func testArrayContainsItems() {
         let array = [1, 2, 3, 4, 5]
         assertArray(array, contains: [1, 2])
@@ -168,7 +167,7 @@ class MyTests: XCTestCase {
 Yes, XCTAssertNoThrow alreAdy exists, but it doesn't allow you to pass in file: StaticString = #filePath, line: UInt = #line as arguments, which is kind of a dealbreaker for me. This method solves that problem, so using it nested in another helper method will still allow you to track the exact file/line where the error occurs. And there's an async-friendly version of this method as well.
 
 ```swift
-class MyTests: XCTestCase {
+final class MyTests: XCTestCase {
     func testNoErrorThrown() {
         assertNoErrorThrown {
             // Your test code here
@@ -191,7 +190,7 @@ enum MyCustomError: Error {
     case invalidInput
 }
 
-class MyTests: XCTestCase {
+final class MyTests: XCTestCase {
     func testErrorIsThrown() {
         assertThrownError(expectedError: MyCustomError.invalidInput) {
             // Your throwing test code here 
@@ -239,7 +238,7 @@ import XCTest
 import NnTestHelpers
 import NnTestVariables
 
-class MyUITests: BaseUITestCase {
+final class MyUITests: BaseUITestCase {
     func testEnvironmentSetup() {
         addKeyToENV("MY_KEY", value: "MY_VALUE")
         // Your test code here
@@ -251,7 +250,7 @@ class MyUITests: BaseUITestCase {
 BaseUITestCase already contains an instance of XCUIApplication for you to access, stored in the `app` property. Use it to easily launch the app or to compose the XCUIElementQuery needed to find a UI element.
 
 ```swift
-class MyUITests: BaseUITestCase {
+final class MyUITests: BaseUITestCase {
     func testWaitForElement() {
         app.launch()
 
@@ -267,7 +266,7 @@ class MyUITests: BaseUITestCase {
 Easily change the date on a date picker. Currently, this method supports only changing selected day, or changing both the selected month and the selected day.
 
 ```swift
-class MyUITests: BaseUITestCase {
+final class MyUITests: BaseUITestCase {
     func testSelectDate_onlyChangeDay() {
         app.launch()
         let datePicker = waitForElement(app.datePickers, id: "myDatePicker")
@@ -285,7 +284,7 @@ class MyUITests: BaseUITestCase {
 Select a tableview/collectonView row (cell) based on the text it should contain.
 
 ```swift
-class MyUITests: BaseUITestCase {
+final class MyUITests: BaseUITestCase {
     func testRowSelection() {
         app.launch()
         let row = getRowContainingText(parentViewId: "myCollectionView", text: "Row Text")
@@ -299,7 +298,7 @@ Delete a tableview/collectionView row (cell) based on the text it should contain
 
 NOTE: By default, "Delete" will be used as the alertSheetButtonId when the value is nil. If you need to tap a different button, simply set alertSheetButtonId to the id of the button you want to press in the alert sheet. 
 ```swift
-class MyUITests: BaseUITestCase {
+final class MyUITests: BaseUITestCase {
     func testDeleteRow_noConfirmationAlert() {
         app.launch()
         let row = getRowContainingText(parentViewId: "myCollectionView", text: "Row Text")
@@ -318,7 +317,7 @@ I'm going to be honest, this method can be a bit flaky. Unfortunatley dealing wi
 
 NOTE: Sometimes the app will need to be tapped in order to proceed. If you experience issues, toggle withAppTap and try again.
 ```swift
-class MyUITests: BaseUITestCase {
+final class MyUITests: BaseUITestCase {
     func testWaitForThirdPartyAlert() {
         app.launch()
         waitForThirdPartyAlert(decription: ""“MyApp” Wants to Use “google.com” to Sign In"", button: "Cancel", withAppTap: true)
@@ -332,7 +331,7 @@ You can enter text in either a regular textfield or a secureField. You can clear
 NOTE: By default, this method will tap the textfield before taking any action. If you expect the field to already be in focus, it may be best to set shouldTapFieldBeforeTyping to false to avoid problems.
 
 ```swift
-class MyUITests: BaseUITestCase {
+final class MyUITests: BaseUITestCase {
     func testTypeInField() {
         app.launch()
         typeInField(fieldId: "username", text: "testUser")
