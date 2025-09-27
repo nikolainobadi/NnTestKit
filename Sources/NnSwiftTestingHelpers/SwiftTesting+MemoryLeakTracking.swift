@@ -38,7 +38,7 @@ import Testing
 /// ## New Usage with @LeakTracked Macro
 /// ```swift
 /// @LeakTracked
-/// struct MyTestSuite {
+/// final class MyTestSuite {
 ///     @Test("MyClass deallocates properly")
 ///     func test_memoryLeakDetected() {
 ///         let sut = makeSUT()
@@ -54,7 +54,7 @@ import Testing
 ///     }
 /// }
 /// ```
-@available(*, deprecated, message: "Use @LeakTracked macro instead. Simply replace 'class MyTests: TrackingMemoryLeaks' with '@LeakTracked struct MyTests'. The macro provides better Sendable conformance, no inheritance requirement, and automatic thread safety.")
+@available(*, deprecated, message: "Use @LeakTracked macro instead. Simply replace 'class MyTests: TrackingMemoryLeaks' with '@LeakTracked final class MyTests'. The macro provides better Sendable conformance, no inheritance requirement, and automatic thread safety.")
 open class TrackingMemoryLeaks {
     private var trackingList: [TrackableObject] = []
     

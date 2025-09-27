@@ -62,9 +62,12 @@ dependencies: [
 For Swift 5.10+, use the modern `@LeakTracked` macro for memory leak detection without inheritance:
 
 **Important Requirements:**
-- The test suite **must be a class** (not a struct) as the macro generates a `deinit` method
+- The test suite **must be a class** (not a struct) as the macro injects a `deinit` method
+- Import both `Testing` and `NnSwiftTestingHelpers` in your test file
 - Most useful when testing **class instances** that need deallocation tracking
 - Reference types (classes) are tracked; value types (structs) don't need leak tracking
+
+**Basic Usage:**
 
 ```swift
 import Testing
@@ -84,6 +87,58 @@ final class MyTestSuite {  // Must be a class, not a struct
         let sut = MyClass(service: service)  // Assuming MyClass is a class
         trackForMemoryLeaks(service, fileID: fileID, filePath: filePath, line: line, column: column)
         trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
+        return sut
+    }
+}
+```
+
+**Behavior Modes:**
+
+The macro supports three leak detection behaviors that can be specified when calling `trackForMemoryLeaks`:
+
+- **`.failIfLeaked` (Default)** - Fails the test if a tracked object is not deallocated
+- **`.warnIfLeaked`** - Logs a warning but doesn't fail the test
+- **`.expectLeak`** - Fails if the object IS deallocated (useful for testing retain cycles)
+
+```swift
+private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
+    let service = MyService()
+    let sut = MyClass(service: service)
+
+    // Default: fails on leak
+    trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
+
+    // Warn only (doesn't fail test)
+    trackForMemoryLeaks(service, behavior: .warnIfLeaked, fileID: fileID, filePath: filePath, line: line, column: column)
+
+    // Expect the object to leak (fails if it deallocates)
+    // trackForMemoryLeaks(sut, behavior: .expectLeak, fileID: fileID, filePath: filePath, line: line, column: column)
+
+    return sut
+}
+```
+
+**Tracking Multiple Objects:**
+
+```swift
+@LeakTracked
+final class ViewModelTests {
+    @Test("ViewModel and dependencies deallocate properly")
+    func test_viewModelLifecycle() {
+        let sut = makeSUT()
+        // Test operations...
+    }
+
+    private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> ViewModel {
+        let service = MockService()
+        let repository = MockRepository()
+        let sut = ViewModel(service: service, repository: repository)
+
+        // Track all objects that should be deallocated
+        trackForMemoryLeaks(service, fileID: fileID, filePath: filePath, line: line, column: column)
+        trackForMemoryLeaks(repository, fileID: fileID, filePath: filePath, line: line, column: column)
+        trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
+
         return sut
     }
 }

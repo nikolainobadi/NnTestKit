@@ -8,20 +8,23 @@
 import Foundation
 import Testing
 
-/// A macro that adds memory leak tracking capabilities to test suites.
+/// A macro that adds memory leak tracking capabilities to test classes.
 ///
-/// `@LeakTracked` automatically injects memory leak tracking functionality into your test suite,
+/// `@LeakTracked` automatically injects memory leak tracking functionality into your test class,
 /// allowing you to detect and validate memory management in your tests. The macro generates:
 /// - A `trackForMemoryLeaks(_:behavior:)` method to track objects
 /// - Automatic verification in `deinit` that tracked objects were deallocated
 /// - Thread-safe tracking with proper synchronization
 ///
+/// **Important**: This macro can only be applied to classes (not structs) because it adds a `deinit`
+/// method to verify tracked objects were deallocated
+///
 /// ## Usage
 ///
-/// Apply the macro to your test suite and use the `makeSUT` factory pattern:
+/// Apply the macro to your test class and use the `makeSUT` factory pattern:
 /// ```swift
 /// @LeakTracked
-/// struct MyTestSuite {
+/// final class MyTestSuite {
 ///     @Test("Verify no memory leaks")
 ///     func test_objectDeallocates() {
 ///         let sut = makeSUT()
@@ -80,7 +83,7 @@ import Testing
 /// When your SUT has dependencies, track them all in the `makeSUT` method:
 /// ```swift
 /// @LeakTracked
-/// struct ViewModelTests {
+/// final class ViewModelTests {
 ///     @Test("ViewModel and dependencies deallocate properly")
 ///     func test_viewModelLifecycle() {
 ///         let sut = makeSUT()
@@ -130,7 +133,7 @@ import Testing
 /// **After (Recommended):**
 /// ```swift
 /// @LeakTracked
-/// struct MyTests {
+/// final class MyTests {
 ///     @Test func test_example() {
 ///         let sut = makeSUT()
 ///         // Test operations...
@@ -155,7 +158,7 @@ import Testing
 /// - Swift Testing framework
 /// - Import both `Testing` and `Foundation` in your test file
 ///
-/// - Note: The macro automatically adds `@Suite(.serialized)` to avoid Sendable conformance issues
+/// - Note: The macro can only be applied to classes (not structs) as it injects a `deinit` method
 @attached(member, names: named(trackForMemoryLeaks), arbitrary)
 public macro LeakTracked() = #externalMacro(module: "NnTestKitMacros", type: "LeakTrackedMacro")
 
