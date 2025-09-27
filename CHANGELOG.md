@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2025-09-27
+### Changed
+- Clarified @LeakTracked macro documentation to emphasize class requirement over struct
+- Expanded memory leak detection usage examples with proper import statements
+- Simplified test class declarations throughout README documentation
+
 ## [1.4.0] - 2025-09-23
 ### Added
 - New `@LeakTracked` macro for memory leak detection without inheritance requirement
@@ -84,7 +90,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Swift 5.5 support with iOS 15+ and macOS 12+ platform requirements
 - Comprehensive README documentation
 
-[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/nikolainobadi/NnTestKit/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/nikolainobadi/NnTestKit/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/nikolainobadi/NnTestKit/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/nikolainobadi/NnTestKit/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/nikolainobadi/NnTestKit/compare/v1.1.3...v1.2.0
