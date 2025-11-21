@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import NnTestHelpers
 import NnTestVariables
 
 @MainActor
@@ -189,6 +190,11 @@ public extension BaseUITestCase {
             return waitForElement(query ?? app.secureTextFields, id: fieldId, message, file: file, line: line)
         }
         return waitForElement(query ?? app.textFields, id: fieldId, message, file: file, line: line)
+    }
+    
+    func tapCenter(of element: XCUIElement, dx: CGFloat = 0.8, dy: CGFloat = 0.5) {
+        let coord = element.coordinate(withNormalizedOffset: CGVector(dx: dx, dy: dy))
+        coord.tap()
     }
 }
 
