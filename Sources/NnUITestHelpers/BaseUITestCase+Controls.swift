@@ -9,6 +9,10 @@ import XCTest
 
 // MARK: - Control Actions
 public extension BaseUITestCase {
+    /// Taps a toggle switch.
+    /// - Parameters:
+    ///   - id: The identifier of the toggle switch.
+    ///   - timeout: The time to wait for the toggle element. Default is 3 seconds.
     func tapToggle(_ id: String, timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) {
         tapCenter(of: waitForElement(app.switches, id: id, timeout: timeout, file: file, line: line))
     }
@@ -18,6 +22,7 @@ public extension BaseUITestCase {
     ///   - pickerId: The identifier of the segmented control.
     ///   - query: The query to use for finding the segmented control. Default is nil.
     ///   - buttonId: The identifier of the button to tap.
+    ///   - timeout: The time to wait for the segmented control element. Default is 3 seconds.
     func tapSegmentedControl(pickerId: String, query: XCUIElementQuery? = nil, buttonId: String, timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) {
         let picker = waitForElement(query ?? app.segmentedControls, id: pickerId, timeout: timeout, file: file, line: line)
 
@@ -29,6 +34,7 @@ public extension BaseUITestCase {
     ///   - id: The identifier for the stepper control to interact with.
     ///   - isIncrementing: A Boolean indicating whether to increment (`true`) or decrement (`false`) the stepper value.
     ///   - count: The number of times to tap the stepper button. Default is 1.
+    ///   - timeout: The time to wait for the stepper element. Default is 3 seconds.
     func adjustStepper(id: String, isIncrementing: Bool, count: Int = 1, timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) {
         let stepper = waitForElement(app.steppers, id: id, timeout: timeout, file: file, line: line)
         let buttonId = "\(id)-\(isIncrementing ? "Increment" : "Decrement")"
