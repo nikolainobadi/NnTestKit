@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Row actions (`deleteRow`)
   - Assertions (`assertButton`)
 
+### Removed
+- **BREAKING**: Removed deprecated `TrackingMemoryLeaks` class (use `@LeakTracked` macro instead)
+
 ## [1.4.1] - 2025-09-27
 ### Changed
 - Clarified @LeakTracked macro documentation to emphasize class requirement over struct

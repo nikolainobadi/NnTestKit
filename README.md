@@ -22,8 +22,6 @@ All test helper libraries should only be included as dependencies in test target
 - [Installation](#installation)
 - [Usage](#usage)
   - [Swift Testing Framework – Memory Leak Tracking](#swift-testing-framework--memory-leak-tracking)
-    - [@LeakTracked Macro (Recommended)](#leaktracked-macro-recommended)
-    - [TrackingMemoryLeaks Class (Legacy)](#trackingmemoryleaks-class-legacy)
   - [XCTestCase Extensions](#xctestcase-extensions)
     - [Memory Leak Tracking](#memory-leak-tracking)
     - [Property Assertions](#property-assertions)
@@ -84,9 +82,9 @@ Then, add the appropriate libraries to your test target dependencies:
 
 ### Swift Testing Framework – Memory Leak Tracking
 
-#### @LeakTracked Macro (Recommended)
+#### @LeakTracked Macro
 
-For Swift 5.10+, use the modern `@LeakTracked` macro for memory leak detection without inheritance:
+For Swift 5.10+, use the `@LeakTracked` macro for memory leak detection without inheritance:
 
 **Important Requirements:**
 - The test suite **must be a class** (not a struct) as the macro injects a `deinit` method
@@ -170,34 +168,6 @@ final class ViewModelTests {
     }
 }
 ```
-
-#### TrackingMemoryLeaks Class (Legacy)
-
-**Deprecated**: For users still using the legacy approach, `NnTestKit` includes a `TrackingMemoryLeaks` class:
-
-```swift
-import Testing
-import NnSwiftTestingHelpers
-@testable import MyModule
-
-final class MyClassSwiftTesting: TrackingMemoryLeaks {
-    @Test("MyClass deallocates properly")
-    func test_memoryLeakDetected() {
-        let sut = makeSUT()
-        // Test operations...
-    }
-
-    private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
-        let service = MyService()
-        let sut = MyClass(service: service)
-        trackForMemoryLeaks(service, fileID: fileID, filePath: filePath, line: line, column: column)
-        trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
-        return sut
-    }
-}
-```
-
-> Note: The `@LeakTracked` macro provides better Swift 6 concurrency support and eliminates the need for inheritance.
 
 ### XCTestCase Extensions
 
