@@ -41,8 +41,8 @@ public extension BaseUITestCase {
     ///   - id: The identifier of the button.
     ///   - query: The query to use for finding the button. Default is nil.
     ///   - isEnabled: Whether the button should be enabled.
-    func assertButton(id: String, query: XCUIElementQuery? = nil, isEnabled: Bool, file: StaticString = #filePath, line: UInt = #line) {
-        let button = waitForElement(query ?? app.buttons, id: id, file: file, line: line)
+    func assertButton(id: String, query: XCUIElementQuery? = nil, isEnabled: Bool, timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) {
+        let button = waitForElement(query ?? app.buttons, id: id, timeout: timeout, file: file, line: line)
 
         if isEnabled {
             XCTAssertTrue(button.isEnabled, "button \(id) should be enabled", file: file, line: line)
