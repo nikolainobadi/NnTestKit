@@ -15,10 +15,11 @@ public extension BaseUITestCase {
     ///   - text: The text to search for.
     ///   - maxScrollAttempts: The maximum number of scroll attempts. Default is 3.
     ///   - isRequiredToExist: Whether the row is required to exist. Default is false.
+    ///   - timeout: The time to wait for the parent view element. Default is 3 seconds.
     /// - Returns: The found `XCUIElement`.
     @discardableResult
-    func getRowContainingText(parentViewId: String, text: String, maxScrollAttempts: Int = 3, isRequiredToExist: Bool = false, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
-        let parentView = waitForElement(app.collectionViews, id: parentViewId, file: file, line: line)
+    func getRowContainingText(parentViewId: String, text: String, maxScrollAttempts: Int = 3, isRequiredToExist: Bool = false, timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
+        let parentView = waitForElement(app.collectionViews, id: parentViewId, timeout: timeout, file: file, line: line)
 
         return getRowContainingText(parentView: parentView, text: text, maxScrollAttempts: maxScrollAttempts, isRequiredToExist: isRequiredToExist, file: file, line: line)
     }
@@ -71,12 +72,13 @@ public extension BaseUITestCase {
     ///   - query: The query to use for finding the field. Default is nil.
     ///   - isSecure: Whether the field is a secure text field.
     ///   - message: The error message to use if the field does not appear. Default is nil.
+    ///   - timeout: The time to wait for the field element. Default is 3 seconds.
     /// - Returns: The found `XCUIElement`.
     @discardableResult
-    func getField(fieldId: String, query: XCUIElementQuery? = nil, isSecure: Bool, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
+    func getField(fieldId: String, query: XCUIElementQuery? = nil, isSecure: Bool, _ message: String? = nil, timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         if isSecure {
-            return waitForElement(query ?? app.secureTextFields, id: fieldId, message, file: file, line: line)
+            return waitForElement(query ?? app.secureTextFields, id: fieldId, timeout: timeout, message, file: file, line: line)
         }
-        return waitForElement(query ?? app.textFields, id: fieldId, message, file: file, line: line)
+        return waitForElement(query ?? app.textFields, id: fieldId, timeout: timeout, message, file: file, line: line)
     }
 }
