@@ -7,7 +7,14 @@
 
 NnTestKit is a Swift package that provides a collection of helper methods to simplify unit and UI testing in your iOS projects. It extends XCTest and Swift Testing frameworks to offer more convenient and powerful assertion methods, memory leak tracking with modern Swift macros, and UI testing utilities.
 
-NOTE: All test helper methods are located in the NnTestHelpers library, which should only be included as a dependency in test targets. NnTestVariables is a much smaller library and only contains a few properties and extensions to assist with testing. The NnSwiftTestingHelpers and NnTestKitMacros libraries provide Swift Testing framework support with modern macro-based memory leak detection.
+NOTE: Test helper methods are split across libraries for better organization:
+- **NnTestHelpers**: Core XCTest extensions (memory leak tracking, property assertions, error handling)
+- **NnUITestHelpers**: UI testing utilities (BaseUITestCase and related helpers)
+- **NnTestVariables**: Lightweight library with test-related properties (can be included in production)
+- **NnSwiftTestingHelpers**: Swift Testing framework support with modern macro-based memory leak detection
+- **NnTestKitMacros**: Swift macros for enhanced testing functionality
+
+All test helper libraries should only be included as dependencies in test targets.
 
 ## Table of Contents
 
@@ -41,17 +48,37 @@ NOTE: All test helper methods are located in the NnTestHelpers library, which sh
 To add `NnTestKit` to your Xcode project, add the following dependency to your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/nikolainobadi/NnTestKit", from: "1.4.0")
+.package(url: "https://github.com/nikolainobadi/NnTestKit", from: "2.0.0")
 ```
 
-Then, add `NnTestKit` to your target dependencies:
+Then, add the appropriate libraries to your test target dependencies:
 
 ```swift
-dependencies: [
-    .product(name: "NnTestHelpers", package: "NnTestKit"),
-    .product(name: "NnTestVariables", package: "NnTestKit"),
-    .product(name: "NnSwiftTestingHelpers", package: "NnTestKit")
-]
+// For unit tests with XCTest
+.testTarget(
+    name: "MyAppTests",
+    dependencies: [
+        .product(name: "NnTestHelpers", package: "NnTestKit"),
+        .product(name: "NnTestVariables", package: "NnTestKit")
+    ]
+)
+
+// For UI tests
+.testTarget(
+    name: "MyAppUITests",
+    dependencies: [
+        .product(name: "NnUITestHelpers", package: "NnTestKit"),
+        .product(name: "NnTestVariables", package: "NnTestKit")
+    ]
+)
+
+// For Swift Testing framework tests
+.testTarget(
+    name: "MyAppSwiftTests",
+    dependencies: [
+        .product(name: "NnSwiftTestingHelpers", package: "NnTestKit")
+    ]
+)
 ```
 ## Usage
 
@@ -284,8 +311,11 @@ final class MyTests: XCTestCase {
     }
 }
 ```
-### BaseUITestCase
-UI Tests are extremely powerful, but the recording process is often diappointing. NnTestKit provides `BaseUITestCase` to help with common actions that can be performed.
+### BaseUITestCase (UI Test Helpers)
+
+> **Note:** As of v2.0.0, `BaseUITestCase` and all UI testing helpers have been moved to the `NnUITestHelpers` library. Update your imports from `import NnTestHelpers` to `import NnUITestHelpers`.
+
+UI Tests are extremely powerful, but the recording process is often disappointing. NnTestKit provides `BaseUITestCase` to help with common actions that can be performed. All UI test helper methods now support customizable timeout parameters (default: 3 seconds) for more flexible element waiting.
 
 #### Setup Helpers
 Easily pass in any environment variables to be used in the app during UI tests. `IS_TRUE` is the default value, which simple sets the value of the passed in key to "true". `ProcessInfo` is extended to include a helper method to easily check for the existence of an `IS_TRUE` value within the environment.
@@ -315,7 +345,7 @@ struct AppLauncher {
 ```swift
 // UI Test target
 import XCTest
-import NnTestHelpers
+import NnUITestHelpers
 import NnTestVariables
 
 final class MyUITests: BaseUITestCase {
@@ -331,14 +361,18 @@ BaseUITestCase already contains an instance of XCUIApplication for you to access
 
 ```swift
 import XCTest
-import NnTestHelpers
+import NnUITestHelpers
 
 final class MyUITests: BaseUITestCase {
     func testWaitForElement() {
         app.launch()
 
+        // Use default 3-second timeout
         let text = waitForElement(app.staticTexts, id: "myTextLabel").label
-        // remainining test code
+
+        // Or customize timeout for slow-loading elements
+        let slowElement = waitForElement(app.buttons, id: "loadButton", timeout: 10)
+        // remaining test code
     }
 }
 ```
@@ -350,7 +384,7 @@ Easily change the date on a date picker. Currently, this method supports only ch
 
 ```swift
 import XCTest
-import NnTestHelpers
+import NnUITestHelpers
 
 final class MyUITests: BaseUITestCase {
     func testSelectDate_onlyChangeDay() {
@@ -358,10 +392,11 @@ final class MyUITests: BaseUITestCase {
         let datePicker = waitForElement(app.datePickers, id: "myDatePicker")
         selectDate(picker: datePicker, dayNumberToSelect: 15)
     }
-    
-    func testSelectDate_changeMonthAndDay) {
+
+    func testSelectDate_changeMonthAndDay() {
         app.launch()
-        selectDate(pickerId: "myDatePicker", currentMonth: "June", newMonth: "January", newDay: 15)
+        // With optional timeout parameter
+        selectDate(pickerId: "myDatePicker", currentMonth: "June", newMonth: "January", newDay: 15, timeout: 5)
     }
 }
 ```
@@ -371,12 +406,12 @@ Select a tableview/collectonView row (cell) based on the text it should contain.
 
 ```swift
 import XCTest
-import NnTestHelpers
+import NnUITestHelpers
 
 final class MyUITests: BaseUITestCase {
     func testRowSelection() {
         app.launch()
-        let row = getRowContainingText(parentViewId: "myCollectionView", text: "Row Text")
+        let row = getRowContainingText(parentViewId: "myCollectionView", text: "Row Text", timeout: 5)
         XCTAssertTrue(row.exists)
     }
 }
@@ -388,7 +423,7 @@ Delete a tableview/collectionView row (cell) based on the text it should contain
 NOTE: By default, "Delete" will be used as the alertSheetButtonId when the value is nil. If you need to tap a different button, simply set alertSheetButtonId to the id of the button you want to press in the alert sheet. 
 ```swift
 import XCTest
-import NnTestHelpers
+import NnUITestHelpers
 
 final class MyUITests: BaseUITestCase {
     func testDeleteRow_noConfirmationAlert() {
@@ -396,11 +431,11 @@ final class MyUITests: BaseUITestCase {
         let row = getRowContainingText(parentViewId: "myCollectionView", text: "Row Text")
         deleteRow(row: row)
     }
-    
+
     func testDeleteRow_withConfirmationAlert() {
         app.launch()
         let row = getRowContainingText(parentViewId: "myCollectionView", text: "Row Text")
-        deleteRow(row: row, swipeButtonId: "Delete", withConfirmationAlert: true, alertSheetButtonId: "ConfirmDelete")
+        deleteRow(row: row, swipeButtonId: "Delete", withConfirmationAlert: true, alertSheetButtonId: "ConfirmDelete", timeout: 5)
     }
 }
 ```
@@ -410,12 +445,12 @@ I'm going to be honest, this method can be a bit flaky. Unfortunatley dealing wi
 NOTE: Sometimes the app will need to be tapped in order to proceed. If you experience issues, toggle withAppTap and try again.
 ```swift
 import XCTest
-import NnTestHelpers
+import NnUITestHelpers
 
 final class MyUITests: BaseUITestCase {
     func testWaitForThirdPartyAlert() {
         app.launch()
-        waitForThirdPartyAlert(decription: ""“MyApp” Wants to Use “google.com” to Sign In"", button: "Cancel", withAppTap: true)
+        waitForThirdPartyAlert(decription: """MyApp" Wants to Use "google.com" to Sign In"", button: "Cancel", withAppTap: true)
         // Perform actions that trigger the third-party alert
     }
 }
@@ -427,18 +462,18 @@ NOTE: By default, this method will tap the textfield before taking any action. I
 
 ```swift
 import XCTest
-import NnTestHelpers
+import NnUITestHelpers
 
 final class MyUITests: BaseUITestCase {
     func testTypeInField() {
         app.launch()
         typeInField(fieldId: "username", text: "testUser")
-        
+
         // Type text into a secure text field and clear it first
         typeInField(fieldId: "password", isSecure: true, text: "password123", clearField: true)
-        
-        // Type text and tap the Done button after typing
-        typeInField(fieldId: "search", text: "query", tapDoneButton: true)
+
+        // Type text and tap the Done button after typing with custom timeout
+        typeInField(fieldId: "search", text: "query", tapSubmitButton: true, timeout: 5)
     }
 }
 ```
