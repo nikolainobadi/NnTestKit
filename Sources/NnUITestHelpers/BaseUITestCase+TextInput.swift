@@ -18,10 +18,11 @@ public extension BaseUITestCase {
     ///   - tapFieldBeforeTyping: Whether to tap the field before typing. Default is true.
     ///   - tapDoneButton: Whether to tap the submit button on the keyboard after typing. Default is false.
     ///   - submitButtonText: The text of the submit buttton to type. Default is 'Done'.
-    func typeInField(fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false, tapFieldBeforeTyping: Bool = true, tapSubmitButton: Bool = false, submitButtonText: String = "Done", file: StaticString = #filePath, line: UInt = #line) {
-        let field = getField(fieldId: fieldId, isSecure: isSecure, file: file, line: line)
+    ///   - timeout: The time to wait for elements. Default is 3 seconds.
+    func typeInField(fieldId: String, isSecure: Bool = false, text: String, clearField: Bool = false, tapFieldBeforeTyping: Bool = true, tapSubmitButton: Bool = false, submitButtonText: String = "Done", timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) {
+        let field = getField(fieldId: fieldId, isSecure: isSecure, timeout: timeout, file: file, line: line)
 
-        typeInField(field: field, text: text, clearField: clearField, tapFieldBeforeTypIng: tapFieldBeforeTyping, tapSubmitButon: tapSubmitButton, submitButtonText: submitButtonText, file: file, line: line)
+        typeInField(field: field, text: text, clearField: clearField, tapFieldBeforeTypIng: tapFieldBeforeTyping, tapSubmitButon: tapSubmitButton, submitButtonText: submitButtonText, timeout: timeout, file: file, line: line)
     }
 
     /// Types text into an alert's text field at the specified index.
@@ -32,11 +33,12 @@ public extension BaseUITestCase {
     ///   - tapFieldBeforeTyping: Whether to tap the field before typing. Default is true.
     ///   - tapSubmitButton: Whether to tap the submit button on the keyboard after typing. Default is false.
     ///   - submitButtonText: The text of the submit button. Default is "Done".
-    func typeInAlertField(fieldIndex: Int = 0, text: String, clearField: Bool = false, tapFieldBeforeTyping: Bool = true, tapSubmitButton: Bool = false, submitButtonText: String = "Done", file: StaticString = #filePath, line: UInt = #line) {
+    ///   - timeout: The time to wait for elements. Default is 3 seconds.
+    func typeInAlertField(fieldIndex: Int = 0, text: String, clearField: Bool = false, tapFieldBeforeTyping: Bool = true, tapSubmitButton: Bool = false, submitButtonText: String = "Done", timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) {
 
         let field = app.alerts.textFields.element(boundBy: fieldIndex)
 
-        typeInField(field: field, text: text, clearField: clearField, tapFieldBeforeTypIng: tapFieldBeforeTyping, tapSubmitButon: tapSubmitButton, submitButtonText: submitButtonText, file: file, line: line)
+        typeInField(field: field, text: text, clearField: clearField, tapFieldBeforeTypIng: tapFieldBeforeTyping, tapSubmitButon: tapSubmitButton, submitButtonText: submitButtonText, timeout: timeout, file: file, line: line)
     }
 
     /// Types text into a specified field element.
@@ -47,7 +49,8 @@ public extension BaseUITestCase {
     ///   - tapFieldBeforeTypIng: Whether to tap the field before typing. Default is true.
     ///   - tapSubmitButon: Whether to tap the submit button on the keyboard after typing. Default is false.
     ///   - submitButtonText: The text of the submit button. Default is "Done".
-    func typeInField(field: XCUIElement, text: String, clearField: Bool = false, tapFieldBeforeTypIng: Bool = true, tapSubmitButon: Bool = false, submitButtonText: String = "Done", file: StaticString = #filePath, line: UInt = #line) {
+    ///   - timeout: The time to wait for elements. Default is 3 seconds.
+    func typeInField(field: XCUIElement, text: String, clearField: Bool = false, tapFieldBeforeTypIng: Bool = true, tapSubmitButon: Bool = false, submitButtonText: String = "Done", timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) {
 
         if tapFieldBeforeTypIng {
             field.tap()
@@ -63,7 +66,7 @@ public extension BaseUITestCase {
         field.typeText(text)
 
         if tapSubmitButon {
-            waitForElement(app.keyboards.buttons, id: submitButtonText, file: file, line: line).tap()
+            waitForElement(app.keyboards.buttons, id: submitButtonText, timeout: timeout, file: file, line: line).tap()
         }
     }
 }
