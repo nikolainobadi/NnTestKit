@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-11-22
+### Changed
+- **BREAKING**: Moved UI testing helpers from `NnTestHelpers` to new `NnUITestHelpers` library
+  - `BaseUITestCase` and all UI test extensions now require importing `NnUITestHelpers`
+  - Update Package.swift to include `.product(name: "NnUITestHelpers", package: "NnTestKit")`
+  - Update test file imports from `import NnTestHelpers` to `import NnUITestHelpers`
+- Refactored `BaseUITestCase` into focused extension files for better organization
+- Updated `tapAlertButton` default button identifier from "Ok" to "Okay"
+
+### Added
+- New `NnUITestHelpers` library with focused UI testing utilities
+- Timeout parameters (default 3 seconds) to all UI test helper methods for customizable element waiting:
+  - Button actions (`tapButton`, `tapAlertButton`, `tapAlertSheetButton`)
+  - Control actions (`tapToggle`, `tapSegmentedControl`, `adjustStepper`)
+  - Element retrieval (`getRowContainingText`, `getField`)
+  - Text input (`typeInField`, `typeInAlertField`)
+  - Date picker actions (`selectDate`)
+  - Row actions (`deleteRow`)
+  - Assertions (`assertButton`)
+
+### Removed
+- **BREAKING**: Removed deprecated `TrackingMemoryLeaks` class (use `@LeakTracked` macro instead)
+
 ## [1.4.1] - 2025-09-27
 ### Changed
 - Clarified @LeakTracked macro documentation to emphasize class requirement over struct
@@ -90,7 +113,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Swift 5.5 support with iOS 15+ and macOS 12+ platform requirements
 - Comprehensive README documentation
 
-[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/nikolainobadi/NnTestKit/compare/v1.4.1...v2.0.0
 [1.4.1]: https://github.com/nikolainobadi/NnTestKit/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/nikolainobadi/NnTestKit/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/nikolainobadi/NnTestKit/compare/v1.2.1...v1.3.0

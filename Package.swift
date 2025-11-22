@@ -11,6 +11,7 @@ let package = Package(
     ],
     products: [
         .library(name: "NnTestHelpers", targets: ["NnTestHelpers"]),
+        .library(name: "NnUITestHelpers", targets: ["NnUITestHelpers"]),
         .library(name: "NnTestVariables", targets: ["NnTestVariables"]),
         .library(name: "NnSwiftTestingHelpers", targets: ["NnSwiftTestingHelpers"])
     ],
@@ -22,15 +23,21 @@ let package = Package(
             name: "NnTestVariables"
         ),
         .target(
-            name: "NnSwiftTestingHelpers",
-            dependencies: [
-                "NnTestKitMacros"
-            ]
-        ),
-        .target(
             name: "NnTestHelpers",
             dependencies: [
                 "NnTestVariables"
+            ]
+        ),
+        .target(
+            name: "NnUITestHelpers",
+            dependencies: [
+                "NnTestHelpers"
+            ]
+        ),
+        .target(
+            name: "NnSwiftTestingHelpers",
+            dependencies: [
+                "NnTestKitMacros"
             ]
         ),
         .macro(
