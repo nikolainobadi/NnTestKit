@@ -25,8 +25,9 @@ All test helper libraries should only be included as dependencies in test target
   - [XCTestCase Extensions](#xctestcase-extensions)
     - [Memory Leak Tracking](#memory-leak-tracking)
     - [Property Assertions](#property-assertions)
-  - [BaseUITestCase (UI Test Helpers)](#baseuittestcase)
+  - [BaseUITestCase (UI Test Helpers)](#baseuittestcase-ui-test-helpers)
     - [Setup Helpers](#setup-helpers)
+    - [Seeded UI Test Helpers](#seeded-ui-test-helpers)
     - [UI Element Helpers](#ui-element-helpers)
     - [UI Action Helpers](#ui-action-helpers)
 - [Swift 6 Compatibility](#swift-6-compatibility)
@@ -39,6 +40,8 @@ All test helper libraries should only be included as dependencies in test target
 - Error handling assertions (sync and async)
 - Swift Testing framework support
 - UI test case setup and helper methods
+- Seeded UI test helpers for driving app state from UI tests via typed, `Codable` seed configs
+- Configurable default timeout for UI helpers via `UITestSeedDefaults.timeout`
 - Swift 6 concurrency compatibility
 
 ## Installation
@@ -285,7 +288,14 @@ final class MyTests: XCTestCase {
 
 > **Note:** As of v2.0.0, `BaseUITestCase` and all UI testing helpers have been moved to the `NnUITestHelpers` library. Update your imports from `import NnTestHelpers` to `import NnUITestHelpers`.
 
-UI Tests are extremely powerful, but the recording process is often disappointing. NnTestKit provides `BaseUITestCase` to help with common actions that can be performed. All UI test helper methods now support customizable timeout parameters (default: 3 seconds) for more flexible element waiting.
+UI Tests are extremely powerful, but the recording process is often disappointing. NnTestKit provides `BaseUITestCase` to help with common actions that can be performed. All UI test helper methods support a customizable timeout parameter and fall back to `UITestSeedDefaults.timeout` (default: 10 seconds) when no timeout is provided. You can override the global default from `setUpWithError` to adjust for slower environments:
+
+```swift
+override func setUpWithError() throws {
+    try super.setUpWithError()
+    UITestSeedDefaults.timeout = 15
+}
+```
 
 #### Setup Helpers
 Easily pass in any environment variables to be used in the app during UI tests. `IS_TRUE` is the default value, which simple sets the value of the passed in key to "true". `ProcessInfo` is extended to include a helper method to easily check for the existence of an `IS_TRUE` value within the environment.
@@ -326,6 +336,113 @@ final class MyUITests: BaseUITestCase {
 }
 ```
 
+#### Seeded UI Test Helpers
+
+UI tests often need to drive the app into a known state before exercising a flow (existing users, sample data, feature flags, etc.). NnTestKit provides a typed seeding pipeline that pushes a `Codable` config from the test into the app via environment variables, so the app can decode it at launch and run its own seeder.
+
+The pieces live in two libraries:
+
+- `NnTestVariables` exposes `UITestSeedContext<Config>`, `UITestSeedKey`, and `UITestSeedDefaults` — these are safe to include in the app target so the app can read the seed at launch.
+- `NnUITestHelpers` exposes the `launchSeeded` / `setSeedConfig` helpers on `BaseUITestCase`.
+
+**Define a seed config shared between app and test targets:**
+
+```swift
+import NnTestVariables
+
+struct MySeedConfig: Codable, Sendable {
+    let users: [String]
+    let startOnboarded: Bool
+}
+```
+
+**Read the seed context in the app at launch:**
+
+```swift
+// App target
+import SwiftUI
+import NnTestVariables
+
+@main
+struct AppLauncher {
+    static func main() throws {
+        if ProcessInfo.isUITesting,
+           let context = UITestSeedContext<MySeedConfig>.fromEnvironment(MySeedConfig.self) {
+            // Run your app-side seeder with context.config, context.userEmail,
+            // context.userPassword, and context.runId before rendering UI.
+            MySeeder.run(context)
+        }
+        MyApp.main()
+    }
+}
+```
+
+`UITestSeedContext.fromEnvironment(_:)` reads `UITEST_RUN_ID`, `UITEST_USER_EMAIL`, and the JSON-encoded `UITEST_SEED_CONFIG` from the environment. The canonical keys are exposed via the `UITestSeedKey` enum so test and app code never have to hard-code strings.
+
+**Launch the app with a seed config from your UI test:**
+
+```swift
+import XCTest
+import NnUITestHelpers
+import NnTestVariables
+
+final class MyUITests: BaseUITestCase {
+    func testSeededLaunch() {
+        let config = MySeedConfig(users: ["alice", "bob"], startOnboarded: true)
+
+        launchSeeded(config: config)
+
+        // The app has now been seeded. `mainUserEmail` returns the generated
+        // email for this run so you can type it into login fields, etc.
+        typeInField(fieldId: "email", text: mainUserEmail)
+    }
+
+    func testSeededSignUpFlow() {
+        // Use setSeedConfig when another flow owns the app.launch() call
+        // (e.g. a reusable sign-up helper).
+        setSeedConfig(MySeedConfig(users: [], startOnboarded: false))
+        signUpWithEmail(mainUserEmail)
+    }
+}
+```
+
+`launchSeeded` generates a unique per-run `runId` and a derived test user email (`tester+<runId>@uitest.local`), JSON-encodes the config into `UITEST_SEED_CONFIG`, and launches the app. `setSeedConfig` does the same without launching, for cases where another helper owns the launch step. Both helpers also accept an `envKeys:` array for additional environment flags you want forwarded with their default `IS_TRUE` value.
+
+**Reference additional seeded users by name:**
+
+```swift
+func testMultipleUsers() {
+    launchSeeded(config: MySeedConfig(users: ["alice", "bob"], startOnboarded: true))
+
+    // App-side seeder creates users using the same email format:
+    //     "\(userName.lowercased())+\(runId)@uitest.local"
+    let aliceEmail = seedEmail(for: "alice")
+    let bobEmail = seedEmail(for: "bob")
+}
+```
+
+**Generate collision-free names across runs:**
+
+```swift
+let houseName = makeUniqueName("BetaHouse") // e.g. "BetaHouse47"
+```
+
+`makeUniqueName(_:)` appends two random digits so names (houses, rooms, usernames, etc.) don't collide across repeated UI test runs.
+
+**Dismiss the iOS "Save Password?" prompt after login:**
+
+```swift
+func testLoginFlow() {
+    launchSeeded(config: MySeedConfig(users: ["alice"], startOnboarded: true))
+    typeInField(fieldId: "email", text: mainUserEmail)
+    typeInField(fieldId: "password", isSecure: true, text: UITestSeedDefaults.password)
+    tapButton("Log In")
+    dismissPasswordPromptIfNeeded()
+}
+```
+
+`dismissPasswordPromptIfNeeded(timeout:)` waits for the "Not Now" system button and taps it if it appears. It falls back to `UITestSeedDefaults.timeout` when no timeout is provided. `UITestSeedDefaults.password` is a shared constant the app-side seeder should use when creating the test user.
+
 #### UI Element Helpers
 BaseUITestCase already contains an instance of XCUIApplication for you to access, stored in the `app` property. Use it to easily launch the app or to compose the XCUIElementQuery needed to find a UI element.
 
@@ -348,6 +465,22 @@ final class MyUITests: BaseUITestCase {
 ```
 
 #### UI Action Helpers
+
+##### Tap First Matching Button
+On some iOS versions (notably iOS 26+), the accessibility tree can contain duplicate elements for the same button — for example nested buttons inside system alerts. `tapFirstButton(_:query:timeout:)` resolves the ambiguity by tapping the first match instead of failing on the duplicates.
+
+```swift
+import XCTest
+import NnUITestHelpers
+
+final class MyUITests: BaseUITestCase {
+    func testTapFirstButton() {
+        app.launch()
+        // Tap "Delete" even if iOS presents duplicate matches inside the alert.
+        tapFirstButton("Delete", query: app.alerts.buttons)
+    }
+}
+```
 
 ##### Date Picker Selection
 Easily change the date on a date picker. Currently, this method supports only changing selected day, or changing both the selected month and the selected day.
