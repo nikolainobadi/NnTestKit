@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-04-11
+
+### Added
+- New `UITestSeedContext<Config>` struct in `NnTestVariables` for passing typed seed configuration from UI tests into the app under test, with a `fromEnvironment(_:)` factory that decodes `UITEST_SEED_CONFIG` JSON
+- New `UITestSeedKey` enum (`runId`, `userEmail`, `seedConfig`) exposing canonical environment variable names shared between test and app targets
+- New `UITestSeedDefaults` namespace with a `password` constant and a mutable `timeout` property (default 10s) used as the fallback timeout for all UI helpers
+- Add `launchSeeded(config:envKeys:)` helper on `BaseUITestCase` that encodes a `Codable` seed config, sets a unique `runId` and test user email, and launches the app
+- Add `setSeedConfig(_:envKeys:)` helper for seeding the environment when another flow owns the launch step
+- Add `mainUserEmail` property and `seedEmail(for:)` helper on `BaseUITestCase` for retrieving generated per-run test user emails
+- Add `makeUniqueName(_:)` helper for generating collision-free names across UI test runs
+- Add `dismissPasswordPromptIfNeeded(timeout:)` helper that dismisses the iOS "Save Password?" system prompt after login flows
+- Add `tapFirstButton(_:query:timeout:)` helper that taps the first matching button, for cases where iOS (e.g. iOS 26+ alerts) creates duplicate elements in the accessibility tree
+
+### Changed
+- UI test helper timeouts now default to `UITestSeedDefaults.timeout` (10 seconds) instead of a hard-coded 3 seconds, and can be overridden globally by setting `UITestSeedDefaults.timeout` in `setUpWithError`. Affected methods: `tapButton`, `tapAlertButton`, `tapAlertSheetButton`, `tapToggle`, `tapSegmentedControl`, `adjustStepper`, `waitForElement`, `elementAppeared`, `elementNotAppeared`, `typeInField`, and `typeInAlertField`
+
 ## [2.0.0] - 2025-11-22
 ### Changed
 - **BREAKING**: Moved UI testing helpers from `NnTestHelpers` to new `NnUITestHelpers` library
@@ -113,7 +129,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Swift 5.5 support with iOS 15+ and macOS 12+ platform requirements
 - Comprehensive README documentation
 
-[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/nikolainobadi/NnTestKit/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/nikolainobadi/NnTestKit/compare/v1.4.1...v2.0.0
 [1.4.1]: https://github.com/nikolainobadi/NnTestKit/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/nikolainobadi/NnTestKit/compare/v1.3.0...v1.4.0
