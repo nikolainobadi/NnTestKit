@@ -9,28 +9,13 @@ import XCTest
 
 // MARK: - Element Retrieval
 public extension BaseUITestCase {
-    /// Retrieves a row containing the specified text from a parent view.
-    /// - Parameters:
-    ///   - parentViewId: The identifier of the parent view.
-    ///   - text: The text to search for.
-    ///   - maxScrollAttempts: The maximum number of scroll attempts. Default is 3.
-    ///   - isRequiredToExist: Whether the row is required to exist. Default is false.
-    ///   - timeout: The time to wait for the parent view element. Default is 3 seconds.
-    /// - Returns: The found `XCUIElement`.
     @discardableResult
-    func getRowContainingText(parentViewId: String, text: String, maxScrollAttempts: Int = 3, isRequiredToExist: Bool = false, timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
+    func getRowContainingText(parentViewId: String, text: String, maxScrollAttempts: Int = 3, isRequiredToExist: Bool = false, timeout: TimeInterval? = nil, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         let parentView = waitForElement(app.collectionViews, id: parentViewId, timeout: timeout, file: file, line: line)
 
         return getRowContainingText(parentView: parentView, text: text, maxScrollAttempts: maxScrollAttempts, isRequiredToExist: isRequiredToExist, file: file, line: line)
     }
 
-    /// Retrieves a row containing the specified text from a parent view.
-    /// - Parameters:
-    ///   - parentView: The parent view to search within. Default is nil.
-    ///   - text: The text to search for.
-    ///   - maxScrollAttempts: The maximum number of scroll attempts. Default is 3.
-    ///   - isRequiredToExist: Whether the row is required to exist. Default is false.
-    /// - Returns: The found `XCUIElement`.
     @discardableResult
     func getRowContainingText(parentView: XCUIElement? = nil, text: String, maxScrollAttempts: Int = 3, isRequiredToExist: Bool = false, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         var currentAttempt = 0
@@ -49,33 +34,20 @@ public extension BaseUITestCase {
         }
 
         if isRequiredToExist {
-            XCTFail("unable to find row with text \(text) after \(3) scroll attempts", file: file, line: line)
+            XCTFail("unable to find row with text \(text) after \(maxScrollAttempts) scroll attempts", file: file, line: line)
         }
 
         return parentView.cells.containing(.staticText, identifier: text).element
     }
 
-    /// Retrieves the index of a row containing the specified text.
-    /// - Parameters:
-    ///   - text: The text to search for.
-    ///   - parentView: The parent view to search within. Default is nil.
-    /// - Returns: The index of the row, or nil if not found.
     func getRowIndex(_ text: String, parentView: XCUIElement? = nil) -> Int? {
         let parentView = parentView ?? app.collectionViews.firstMatch
 
         return parentView.cells.allElementsBoundByIndex.firstIndex(where: { $0.staticTexts[text].exists })
     }
 
-    /// Retrieves a field element with the specified identifier.
-    /// - Parameters:
-    ///   - fieldId: The identifier of the field.
-    ///   - query: The query to use for finding the field. Default is nil.
-    ///   - isSecure: Whether the field is a secure text field.
-    ///   - message: The error message to use if the field does not appear. Default is nil.
-    ///   - timeout: The time to wait for the field element. Default is 3 seconds.
-    /// - Returns: The found `XCUIElement`.
     @discardableResult
-    func getField(fieldId: String, query: XCUIElementQuery? = nil, isSecure: Bool, _ message: String? = nil, timeout: TimeInterval = 3, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
+    func getField(fieldId: String, query: XCUIElementQuery? = nil, isSecure: Bool, _ message: String? = nil, timeout: TimeInterval? = nil, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         if isSecure {
             return waitForElement(query ?? app.secureTextFields, id: fieldId, timeout: timeout, message, file: file, line: line)
         }

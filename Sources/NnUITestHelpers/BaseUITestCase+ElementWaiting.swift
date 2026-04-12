@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import NnTestVariables
 
 // MARK: - Element Waiting & Visibility
 public extension BaseUITestCase {
@@ -17,10 +18,10 @@ public extension BaseUITestCase {
     ///   - message: The error message to use if the element does not appear. Default is nil.
     /// - Returns: The found `XCUIElement`.
     @discardableResult
-    func waitForElement(_ query: XCUIElementQuery, id: String, timeout: TimeInterval = 3, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
+    func waitForElement(_ query: XCUIElementQuery, id: String, timeout: TimeInterval? = nil, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         let element = query[id]
 
-        elementAppeared(query, named: id, timeout: timeout, message, file: file, line: line)
+        elementAppeared(query, named: id, timeout: timeout ?? UITestSeedDefaults.timeout, message, file: file, line: line)
 
         return element
     }
@@ -31,7 +32,8 @@ public extension BaseUITestCase {
     ///   - name: The name of the element.
     ///   - timeout: The time to wait for the element. Default is 3 seconds.
     ///   - message: The error message to use if the element does not appear. Default is nil.
-    func elementAppeared(_ query: XCUIElementQuery, named name: String, timeout: TimeInterval = 3, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
+    func elementAppeared(_ query: XCUIElementQuery, named name: String, timeout: TimeInterval? = nil, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
+        let timeout = timeout ?? UITestSeedDefaults.timeout
         let element = query[name]
         let existsPredicate = NSPredicate(format: "exists == TRUE")
         let expectation = XCTNSPredicateExpectation(predicate: existsPredicate, object: element)
@@ -46,7 +48,8 @@ public extension BaseUITestCase {
     ///   - name: The name of the element.
     ///   - timeout: The time to wait for the element to disappear. Default is 3 seconds.
     ///   - message: The error message to use if the element does not disappear. Default is nil.
-    func elementNotAppeared(_ query: XCUIElementQuery, named name: String, timeout: TimeInterval = 2, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
+    func elementNotAppeared(_ query: XCUIElementQuery, named name: String, timeout: TimeInterval? = nil, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
+        let timeout = timeout ?? UITestSeedDefaults.timeout
         let element = query[name]
         let notExistsPredicate = NSPredicate(format: "exists == FALSE")
         let expectation = XCTNSPredicateExpectation(predicate: notExistsPredicate, object: element)
