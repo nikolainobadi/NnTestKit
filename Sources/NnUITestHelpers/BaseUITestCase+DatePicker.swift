@@ -41,5 +41,32 @@ public extension BaseUITestCase {
     private func tapDatePickerMonthButton(month: String, year: Int, timeout: TimeInterval? = nil, file: StaticString = #filePath, line: UInt = #line) {
         waitForElement(app.datePickers.staticTexts, id: "\(month) \(year)", timeout: timeout, file: file, line: line).tap()
     }
+
+    /// Adjusts a compact-style `DatePicker` with `displayedComponents: .hourAndMinute`
+    /// by tapping it open, setting its hour/minute (and optional AM/PM period)
+    /// wheels, then tapping it again to dismiss the inline overlay.
+    ///
+    /// - Parameters:
+    ///   - pickerId: Accessibility identifier of the `DatePicker`.
+    ///   - hour: Hour wheel value (e.g. `"9"`). Locale-dependent — 12h locales
+    ///     expect 1–12, 24h locales expect 0–23.
+    ///   - minute: Minute wheel value (e.g. `"30"`).
+    ///   - period: AM/PM wheel value when running under a 12-hour locale; pass
+    ///     `nil` under 24-hour locales.
+    ///   - timeout: Optional override for the picker-lookup timeout.
+    func selectTime(pickerId: String, hour: String, minute: String, period: String? = nil, timeout: TimeInterval? = nil, file: StaticString = #filePath, line: UInt = #line) {
+        let picker = waitForElement(app.datePickers, id: pickerId, timeout: timeout, file: file, line: line)
+        picker.tap()
+
+        let wheels = app.pickerWheels
+        wheels.element(boundBy: 0).adjust(toPickerWheelValue: hour)
+        wheels.element(boundBy: 1).adjust(toPickerWheelValue: minute)
+
+        if let period {
+            wheels.element(boundBy: 2).adjust(toPickerWheelValue: period)
+        }
+
+        picker.tap()
+    }
 #endif
 }
