@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-05-23
+
+### Added
+- Add `observationStream(of:)` helper in `NnSwiftTestingHelpers` that bridges an `@Observable` property to an `AsyncStream` of post-change values, mirroring the ergonomics of `Published.Publisher.waitUntil` from `CombineHelpers` (macOS 14+, iOS 17+, tvOS 17+, watchOS 10+)
+- Add `AsyncStream.waitUntil(timeout:condition:)` extension (with `AsyncStream.WaitError.timeout`) for awaiting a value that satisfies a predicate
+- Add `expectObservationFires(when:afterReading:timeout:sourceLocation:)` one-shot assertion that verifies an `@Observable` property change propagates through `withObservationTracking` after running a trigger
+- Add `selectTime(pickerId:hour:minute:period:timeout:)` helper on `BaseUITestCase` for adjusting compact-style `DatePicker`s configured with `displayedComponents: .hourAndMinute`, including optional AM/PM wheel support for 12-hour locales
+
 ## [2.1.0] - 2026-04-11
 
 ### Added
@@ -129,7 +137,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Swift 5.5 support with iOS 15+ and macOS 12+ platform requirements
 - Comprehensive README documentation
 
-[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/nikolainobadi/NnTestKit/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/nikolainobadi/NnTestKit/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/nikolainobadi/NnTestKit/compare/v1.4.1...v2.0.0
 [1.4.1]: https://github.com/nikolainobadi/NnTestKit/compare/v1.4.0...v1.4.1
