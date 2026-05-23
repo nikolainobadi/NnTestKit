@@ -4,11 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-NnTestKit is a Swift package providing testing utilities for iOS/macOS projects. It consists of four libraries:
-- **NnTestHelpers**: Main testing utilities extending XCTest (memory leak tracking, assertions, UI test helpers)
+NnTestKit is a Swift package providing testing utilities for iOS/macOS projects. It consists of four libraries plus an internal macro target:
+- **NnTestHelpers**: Main testing utilities extending XCTest (memory leak tracking, assertions, async helpers)
+- **NnUITestHelpers**: XCUITest base class and helpers (element waiting, date pickers, alerts, seeding)
 - **NnTestVariables**: Lightweight library with test-related properties (can be included in production)
-- **NnSwiftTestingHelpers**: Support for Swift's new Testing framework with memory leak tracking via @LeakTracked macro
-- **NnTestKitMacros**: Swift macros for enhanced testing functionality (requires Swift 5.10+)
+- **NnSwiftTestingHelpers**: Support for Swift's new Testing framework — `@LeakTracked` macro for memory leak tracking, plus Combine and Observation testing helpers
+- **NnTestKitMacros**: Macro target backing `NnSwiftTestingHelpers` (requires Swift 5.10+)
 
 ## Build & Test Commands
 
@@ -30,6 +31,7 @@ swift package clean
 
 ### Library Dependencies
 - `NnTestHelpers` depends on `NnTestVariables`
+- `NnUITestHelpers` depends on `NnTestHelpers`
 - `NnSwiftTestingHelpers` depends on `NnTestKitMacros`
 - `NnTestKitMacros` requires Swift 5.10+ and SwiftSyntax
 - All helper libraries import testing frameworks (XCTest/Testing) and should only be used in test targets
@@ -43,16 +45,18 @@ swift package clean
 - Error handling assertions (sync and async versions)
 - Combine publisher testing utilities (Swift 6 compatible with `@preconcurrency`)
 
-**NnTestHelpers/BaseUITestCase.swift**: UI testing base class providing:
+**NnUITestHelpers/BaseUITestCase.swift**: UI testing base class providing:
 - Environment variable setup helpers
 - UI element waiting and interaction
 - Date picker, row selection/deletion helpers
 - Third-party alert handling
 - Swift 6 compatible with `@MainActor` annotation
 
-**NnSwiftTestingHelpers/SwiftTesting+MemoryLeakTracking.swift**: `TrackingMemoryLeaks` base class for Swift Testing framework (deprecated in favor of `@LeakTracked` macro)
-
 **NnSwiftTestingHelpers/LeakTracked.swift**: `@LeakTracked` macro declaration and `TrackableObject` class for memory leak tracking without inheritance
+
+**NnSwiftTestingHelpers/CombineHelpers.swift**: `Published.Publisher.waitUntil(timeout:condition:)` for asserting that a `@Published` property eventually reaches a target state
+
+**NnSwiftTestingHelpers/ObservationHelpers.swift**: `observationStream(of:)`, `AsyncStream.waitUntil`, and `expectObservationFires` for testing `@Observable` change propagation (iOS 17+ / macOS 14+)
 
 **NnTestKitMacros/LeakTrackedMacro.swift**: Macro implementation that injects memory tracking functionality with thread-safe NSLock synchronization
 
@@ -69,23 +73,6 @@ import Testing
 
 @LeakTracked
 struct MyTestSuite {
-    @Test("Memory leak detection")
-    func test_memoryLeak() {
-        let sut = makeSUT()
-        // Test operations...
-    }
-
-    private func makeSUT(fileID: String = #fileID, filePath: String = #filePath, line: Int = #line, column: Int = #column) -> MyClass {
-        let sut = MyClass()
-        trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)
-        return sut
-    }
-}
-```
-
-**Legacy: Using TrackingMemoryLeaks Base Class (Deprecated)**
-```swift
-final class MyTestSuite: TrackingMemoryLeaks {
     @Test("Memory leak detection")
     func test_memoryLeak() {
         let sut = makeSUT()
