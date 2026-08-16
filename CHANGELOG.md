@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-08-16
+
+Documentation and tooling release. No public API changes.
+
+### Added
+- The `NnTesting` skill now lives in this repo at `Skills/NnTesting`, so the API reference changes in the same PR as the API it documents. It is published through the `nn-swift-skills` marketplace, pinned to this tag
+- `.github/workflows/skill-docs.yml` fails any PR that changes a `public`/`open`/`package` declaration under `Sources/` without touching `Skills/`. Waive with the `skip-skill-check` label when a PR changes no documented behavior
+- `.github/workflows/skill-ref-bump.yml` bumps the marketplace's pinned `ref` on tag push, so released documentation always matches a shipped version
+- README sections for `observationStream(of:)`, `expectObservationFires`, `Published.Publisher.waitUntil`, and `selectTime` — all shipped in 2.2.0 but previously undocumented
+
+### Fixed
+- README platform badge claimed iOS 15+ / macOS 12+; the package requires iOS 17+ / macOS 13+
+- README and doc comments on `waitForElement`, `elementAppeared`, `elementNotAppeared`, and `deleteRow` still described a 3-second default timeout, which 2.1.0 replaced with `UITestSeedDefaults.timeout` (10 seconds)
+- README stated `selectDate` could only change the day, or the month and day, omitting `selectTime`
+- README named the `typeInField` parameter `shouldTapFieldBeforeTyping`; it is `tapFieldBeforeTyping`
+- `CLAUDE.md` showed `@LeakTracked` applied to a `struct`; the macro generates a `deinit` and requires a class
+- Broken table-of-contents anchor for the BaseUITestCase section
+
 ## [2.2.0] - 2026-05-23
 
 ### Added

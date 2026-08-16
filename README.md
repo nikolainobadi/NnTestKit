@@ -2,7 +2,7 @@
 # NnTestKit
 
 [![Swift Version](https://img.shields.io/badge/Swift-5.10%2B-orange.svg)](https://swift.org)
-![Platform](https://badgen.net/badge/platform/iOS%2015%2B%20%7C%20macOS%2012%2B/blue)
+![Platform](https://badgen.net/badge/platform/iOS%2017%2B%20%7C%20macOS%2013%2B/blue)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 NnTestKit is a Swift package that provides a collection of helper methods to simplify unit and UI testing in your iOS projects. It extends XCTest and Swift Testing frameworks to offer more convenient and powerful assertion methods, memory leak tracking with modern Swift macros, and UI testing utilities.
@@ -16,16 +16,25 @@ NOTE: Test helper methods are split across libraries for better organization:
 
 All test helper libraries should only be included as dependencies in test targets.
 
+> **Looking for the complete API reference?** This README is a guided tour of the
+> common paths. Every public symbol — including the UI assertions, control helpers,
+> and test-data generators not shown here — is documented in
+> [`Skills/NnTesting`](Skills/NnTesting), which lives in this repo so it changes in the
+> same PR as the API it describes.
+
 ## Table of Contents
 
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
   - [Swift Testing Framework – Memory Leak Tracking](#swift-testing-framework--memory-leak-tracking)
+  - [Swift Testing Framework – Async State Helpers](#swift-testing-framework--async-state-helpers)
+    - [Waiting on a @Published Property](#waiting-on-a-published-property)
+    - [Waiting on an @Observable Property](#waiting-on-an-observable-property)
   - [XCTestCase Extensions](#xctestcase-extensions)
     - [Memory Leak Tracking](#memory-leak-tracking)
     - [Property Assertions](#property-assertions)
-  - [BaseUITestCase (UI Test Helpers)](#baseuittestcase-ui-test-helpers)
+  - [BaseUITestCase (UI Test Helpers)](#baseuitestcase-ui-test-helpers)
     - [Setup Helpers](#setup-helpers)
     - [Seeded UI Test Helpers](#seeded-ui-test-helpers)
     - [UI Element Helpers](#ui-element-helpers)
@@ -39,6 +48,8 @@ All test helper libraries should only be included as dependencies in test target
 - Property and array assertions
 - Error handling assertions (sync and async)
 - Swift Testing framework support
+- Async waiting on `@Published` properties via `waitUntil`
+- `@Observable` change-propagation testing via `observationStream` and `expectObservationFires`
 - UI test case setup and helper methods
 - Seeded UI test helpers for driving app state from UI tests via typed, `Codable` seed configs
 - Configurable default timeout for UI helpers via `UITestSeedDefaults.timeout`
@@ -49,7 +60,7 @@ All test helper libraries should only be included as dependencies in test target
 To add `NnTestKit` to your Xcode project, add the following dependency to your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/nikolainobadi/NnTestKit", from: "2.0.0")
+.package(url: "https://github.com/nikolainobadi/NnTestKit", from: "2.2.0")
 ```
 
 Then, add the appropriate libraries to your test target dependencies:
@@ -172,12 +183,92 @@ final class ViewModelTests {
 }
 ```
 
+### Swift Testing Framework – Async State Helpers
+
+Swift Testing has no equivalent of `XCTestExpectation`, so asserting that state
+*eventually* reaches a value means writing your own polling loop. `NnSwiftTestingHelpers`
+provides two helpers for this — one for Combine's `@Published`, one for the Observation
+framework's `@Observable`.
+
+Both are `@MainActor` and both throw on timeout rather than failing inline, so you can
+`try await` them directly in a `@Test`.
+
+#### Waiting on a @Published Property
+
+`waitUntil(timeout:condition:)` suspends until the publisher emits a value satisfying the
+condition, or throws `PublisherError.timeout`. The default timeout is **1 second**.
+
+```swift
+import Testing
+import NnSwiftTestingHelpers
+@testable import MyModule
+
+@Test("Items load successfully")
+@MainActor
+func itemsLoad() async throws {
+    let viewModel = ItemsViewModel()
+
+    viewModel.loadItems()
+
+    try await viewModel.$items.waitUntil { $0.count == 3 }
+}
+```
+
+The extension is constrained to `Output: Equatable & Sendable`. For an arbitrary
+`Publisher` in an `XCTestCase`, use `waitForCondition` from `NnTestHelpers` instead.
+
+#### Waiting on an @Observable Property
+
+For `@Observable` types, `observationStream(of:)` bridges a property to an `AsyncStream`
+of post-change values, which you then await with `waitUntil`. Requires iOS 17+ / macOS 14+.
+
+```swift
+import Testing
+import NnSwiftTestingHelpers
+@testable import MyModule
+
+@Test("Items load via @Observable view model")
+@MainActor
+func itemsLoad() async throws {
+    let viewModel = ItemsViewModel()
+    let stream = observationStream(of: { viewModel.items })
+
+    viewModel.loadItems()
+
+    try await stream.waitUntil { $0.count == 3 }
+}
+```
+
+**Important:** the stream yields *only on changes* — it does not emit the current value on
+subscribe. Take the stream first, then trigger the mutation, or you'll wait for a change
+that already happened.
+
+When you only need to assert that a change *propagated* — through a wrapper, a computed
+property, a forwarding layer — without caring about the resulting value, use
+`expectObservationFires`:
+
+```swift
+@Test("Wrapper preserves observation propagation")
+@MainActor
+func wrapperFiresObservation() async {
+    let source = CounterModel()
+    let wrapper = CounterWrapper(source: source)
+
+    await expectObservationFires(when: {
+        source.count += 1
+    }, afterReading: wrapper.count)
+}
+```
+
+A timeout here becomes a failing `#expect` reported at your call site, rather than a
+thrown error.
+
 ### XCTestCase Extensions
 
 NnTestKit extends `XCTestCase` with several useful methods:
 
 #### Memory Leak Tracking
-Prevent memory leaks before they infect your code by passing the object you want to track into this method before running your unit tests. This method ensures the object in question is dellocated by the end of the test eles the test will fail.
+Prevent memory leaks before they infect your code by passing the object you want to track into this method before running your unit tests. This method ensures the object in question is deallocated by the end of the test, else the test will fail.
 ```swift
 import XCTest
 import NnTestHelpers
@@ -194,7 +285,7 @@ final class MyTests: XCTestCase {
 #### Property Assertions
 
 ##### Assert Optional Properties
-Use this method when you want to ensure a propery is not nil, then make any extra assertions you may want to check.
+Use this method when you want to ensure a property is not nil, then make any extra assertions you may want to check.
 ```swift
 import XCTest
 import NnTestHelpers
@@ -238,7 +329,7 @@ final class MyTests: XCTestCase {
 ```
 
 ##### Assert No Error Thrown
-Yes, XCTAssertNoThrow alreAdy exists, but it doesn't allow you to pass in file: StaticString = #filePath, line: UInt = #line as arguments, which is kind of a dealbreaker for me. This method solves that problem, so using it nested in another helper method will still allow you to track the exact file/line where the error occurs. And there's an async-friendly version of this method as well.
+Yes, XCTAssertNoThrow already exists, but it doesn't allow you to pass in file: StaticString = #filePath, line: UInt = #line as arguments, which is kind of a dealbreaker for me. This method solves that problem, so using it nested in another helper method will still allow you to track the exact file/line where the error occurs. And there's an async-friendly version of this method as well.
 
 ```swift
 import XCTest
@@ -298,9 +389,9 @@ override func setUpWithError() throws {
 ```
 
 #### Setup Helpers
-Easily pass in any environment variables to be used in the app during UI tests. `IS_TRUE` is the default value, which simple sets the value of the passed in key to "true". `ProcessInfo` is extended to include a helper method to easily check for the existence of an `IS_TRUE` value within the environment.
+Easily pass in any environment variables to be used in the app during UI tests. `IS_TRUE` is the default value, which simply sets the value of the passed in key to "true". `ProcessInfo` is extended to include a helper method to easily check for the existence of an `IS_TRUE` value within the environment.
 
-When UI testing, the environment variable `IS_UI_TESTING` is automatically passed into the environment. Like `ProcessInfo.isTesting`, `ProcessInfo.isUITesting` can be access by importing the smaller libarary `NnTestVariables` so it won't cause too much bloat if used in production.
+When UI testing, the environment variable `IS_UI_TESTING` is automatically passed into the environment. Like `ProcessInfo.isTesting`, `ProcessInfo.isUITesting` can be accessed by importing the smaller library `NnTestVariables` so it won't cause too much bloat if used in production.
 
 ```swift
 // App target 
@@ -454,7 +545,7 @@ final class MyUITests: BaseUITestCase {
     func testWaitForElement() {
         app.launch()
 
-        // Use default 3-second timeout
+        // Use the default timeout (UITestSeedDefaults.timeout, 10 seconds)
         let text = waitForElement(app.staticTexts, id: "myTextLabel").label
 
         // Or customize timeout for slow-loading elements
@@ -483,7 +574,7 @@ final class MyUITests: BaseUITestCase {
 ```
 
 ##### Date Picker Selection
-Easily change the date on a date picker. Currently, this method supports only changing selected day, or changing both the selected month and the selected day.
+Easily change the date on a date picker. `selectDate` supports changing just the selected day, or changing both the selected month and the selected day.
 
 ```swift
 import XCTest
@@ -504,8 +595,30 @@ final class MyUITests: BaseUITestCase {
 }
 ```
 
+##### Time Picker Selection
+For a compact `DatePicker` configured with `displayedComponents: .hourAndMinute`, use `selectTime`. It taps the picker to open its inline overlay, adjusts the wheels, then taps again to dismiss.
+
+NOTE: wheel values are locale-dependent. A 12-hour locale expects an hour of 1–12 plus an AM/PM `period`; a 24-hour locale expects an hour of 0–23 and `period: nil`.
+
+```swift
+import XCTest
+import NnUITestHelpers
+
+final class MyUITests: BaseUITestCase {
+    func testSelectTime_twelveHourLocale() {
+        app.launch()
+        selectTime(pickerId: "reminderTimePicker", hour: "8", minute: "30", period: "AM")
+    }
+
+    func testSelectTime_twentyFourHourLocale() {
+        app.launch()
+        selectTime(pickerId: "reminderTimePicker", hour: "20", minute: "30")
+    }
+}
+```
+
 ##### Row Selection
-Select a tableview/collectonView row (cell) based on the text it should contain.
+Select a tableview/collectionView row (cell) based on the text it should contain.
 
 ```swift
 import XCTest
@@ -521,7 +634,7 @@ final class MyUITests: BaseUITestCase {
 ```
 
 ##### Row Deletion
-Delete a tableview/collectionView row (cell) based on the text it should contain. If a confirmationDialgue is expected to display after attempting to delete the row, set withConfirmationAlert to true to tap the corresponding alertSheetButton.
+Delete a tableview/collectionView row (cell) based on the text it should contain. If a confirmation dialog is expected to display after attempting to delete the row, set withConfirmationAlert to true to tap the corresponding alertSheetButton.
 
 NOTE: By default, "Delete" will be used as the alertSheetButtonId when the value is nil. If you need to tap a different button, simply set alertSheetButtonId to the id of the button you want to press in the alert sheet. 
 ```swift
@@ -543,7 +656,7 @@ final class MyUITests: BaseUITestCase {
 }
 ```
 ##### Third Party Alerts
-I'm going to be honest, this method can be a bit flaky. Unfortunatley dealing with third party alerts isn't as reliable as dealing with native iOS alerts. Still, if you need to tap a button on an alert presented by a third party, this is the method to use. 
+I'm going to be honest, this method can be a bit flaky. Unfortunately, dealing with third party alerts isn't as reliable as dealing with native iOS alerts. Still, if you need to tap a button on an alert presented by a third party, this is the method to use. 
 
 NOTE: Sometimes the app will need to be tapped in order to proceed. If you experience issues, toggle withAppTap and try again.
 ```swift
@@ -561,7 +674,7 @@ final class MyUITests: BaseUITestCase {
 ##### Type in textfield
 You can enter text in either a regular textfield or a secureField. You can clear the field text before typing, as well as tap the keyboard "Done" button when finished. 
 
-NOTE: By default, this method will tap the textfield before taking any action. If you expect the field to already be in focus, it may be best to set shouldTapFieldBeforeTyping to false to avoid problems.
+NOTE: By default, this method will tap the textfield before taking any action. If you expect the field to already be in focus, it may be best to set `tapFieldBeforeTyping` to false to avoid problems.
 
 ```swift
 import XCTest

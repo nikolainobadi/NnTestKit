@@ -15,7 +15,7 @@ public extension BaseUITestCase {
     ///   - swipeButtonId: The identifier of the swipe button. Default is "Delete".
     ///   - withConfirmationAlert: A Boolean value indicating whether a confirmation alert should be handled. Default is false.
     ///   - alertSheetButtonId: The identifier of the alert sheet button, relevant only if withConfirmationAlert is true. Default is nil, which means the swipeButtonId will be used.
-    ///   - timeout: The time to wait for button elements. Default is 3 seconds.
+    ///   - timeout: The time to wait for button elements. Defaults to `UITestSeedDefaults.timeout` when nil.
     func deleteRow(row: XCUIElement, swipeButtonId: String = "Delete", withConfirmationAlert: Bool = false, alertSheetButtonId: String? = nil, timeout: TimeInterval? = nil, file: StaticString = #filePath, line: UInt = #line) {
         row.swipeLeft()
         tapButton(swipeButtonId, timeout: timeout, file: file, line: line)

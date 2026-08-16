@@ -14,7 +14,7 @@ public extension BaseUITestCase {
     /// - Parameters:
     ///   - query: The query to use for finding the element.
     ///   - id: The identifier of the element.
-    ///   - timeout: The time to wait for the element. Default is 3 seconds.
+    ///   - timeout: The time to wait for the element. Defaults to `UITestSeedDefaults.timeout` when nil.
     ///   - message: The error message to use if the element does not appear. Default is nil.
     /// - Returns: The found `XCUIElement`.
     @discardableResult
@@ -30,7 +30,7 @@ public extension BaseUITestCase {
     /// - Parameters:
     ///   - query: The query to use for finding the element.
     ///   - name: The name of the element.
-    ///   - timeout: The time to wait for the element. Default is 3 seconds.
+    ///   - timeout: The time to wait for the element. Defaults to `UITestSeedDefaults.timeout` when nil.
     ///   - message: The error message to use if the element does not appear. Default is nil.
     func elementAppeared(_ query: XCUIElementQuery, named name: String, timeout: TimeInterval? = nil, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
         let timeout = timeout ?? UITestSeedDefaults.timeout
@@ -46,7 +46,7 @@ public extension BaseUITestCase {
     /// - Parameters:
     ///   - query: The query to use for finding the element.
     ///   - name: The name of the element.
-    ///   - timeout: The time to wait for the element to disappear. Default is 3 seconds.
+    ///   - timeout: The time to wait for the element to disappear. Defaults to `UITestSeedDefaults.timeout` when nil.
     ///   - message: The error message to use if the element does not disappear. Default is nil.
     func elementNotAppeared(_ query: XCUIElementQuery, named name: String, timeout: TimeInterval? = nil, _ message: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
         let timeout = timeout ?? UITestSeedDefaults.timeout
