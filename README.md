@@ -16,6 +16,12 @@ NOTE: Test helper methods are split across libraries for better organization:
 
 All test helper libraries should only be included as dependencies in test targets.
 
+> **Looking for the complete API reference?** This README is a guided tour of the
+> common paths. Every public symbol — including the UI assertions, control helpers,
+> and test-data generators not shown here — is documented in
+> [`Skills/NnTesting`](Skills/NnTesting), which lives in this repo so it changes in the
+> same PR as the API it describes.
+
 ## Table of Contents
 
 - [Features](#features)
@@ -262,7 +268,7 @@ thrown error.
 NnTestKit extends `XCTestCase` with several useful methods:
 
 #### Memory Leak Tracking
-Prevent memory leaks before they infect your code by passing the object you want to track into this method before running your unit tests. This method ensures the object in question is dellocated by the end of the test eles the test will fail.
+Prevent memory leaks before they infect your code by passing the object you want to track into this method before running your unit tests. This method ensures the object in question is deallocated by the end of the test, else the test will fail.
 ```swift
 import XCTest
 import NnTestHelpers
@@ -279,7 +285,7 @@ final class MyTests: XCTestCase {
 #### Property Assertions
 
 ##### Assert Optional Properties
-Use this method when you want to ensure a propery is not nil, then make any extra assertions you may want to check.
+Use this method when you want to ensure a property is not nil, then make any extra assertions you may want to check.
 ```swift
 import XCTest
 import NnTestHelpers
@@ -323,7 +329,7 @@ final class MyTests: XCTestCase {
 ```
 
 ##### Assert No Error Thrown
-Yes, XCTAssertNoThrow alreAdy exists, but it doesn't allow you to pass in file: StaticString = #filePath, line: UInt = #line as arguments, which is kind of a dealbreaker for me. This method solves that problem, so using it nested in another helper method will still allow you to track the exact file/line where the error occurs. And there's an async-friendly version of this method as well.
+Yes, XCTAssertNoThrow already exists, but it doesn't allow you to pass in file: StaticString = #filePath, line: UInt = #line as arguments, which is kind of a dealbreaker for me. This method solves that problem, so using it nested in another helper method will still allow you to track the exact file/line where the error occurs. And there's an async-friendly version of this method as well.
 
 ```swift
 import XCTest
@@ -383,9 +389,9 @@ override func setUpWithError() throws {
 ```
 
 #### Setup Helpers
-Easily pass in any environment variables to be used in the app during UI tests. `IS_TRUE` is the default value, which simple sets the value of the passed in key to "true". `ProcessInfo` is extended to include a helper method to easily check for the existence of an `IS_TRUE` value within the environment.
+Easily pass in any environment variables to be used in the app during UI tests. `IS_TRUE` is the default value, which simply sets the value of the passed in key to "true". `ProcessInfo` is extended to include a helper method to easily check for the existence of an `IS_TRUE` value within the environment.
 
-When UI testing, the environment variable `IS_UI_TESTING` is automatically passed into the environment. Like `ProcessInfo.isTesting`, `ProcessInfo.isUITesting` can be access by importing the smaller libarary `NnTestVariables` so it won't cause too much bloat if used in production.
+When UI testing, the environment variable `IS_UI_TESTING` is automatically passed into the environment. Like `ProcessInfo.isTesting`, `ProcessInfo.isUITesting` can be accessed by importing the smaller library `NnTestVariables` so it won't cause too much bloat if used in production.
 
 ```swift
 // App target 
@@ -612,7 +618,7 @@ final class MyUITests: BaseUITestCase {
 ```
 
 ##### Row Selection
-Select a tableview/collectonView row (cell) based on the text it should contain.
+Select a tableview/collectionView row (cell) based on the text it should contain.
 
 ```swift
 import XCTest
@@ -628,7 +634,7 @@ final class MyUITests: BaseUITestCase {
 ```
 
 ##### Row Deletion
-Delete a tableview/collectionView row (cell) based on the text it should contain. If a confirmationDialgue is expected to display after attempting to delete the row, set withConfirmationAlert to true to tap the corresponding alertSheetButton.
+Delete a tableview/collectionView row (cell) based on the text it should contain. If a confirmation dialog is expected to display after attempting to delete the row, set withConfirmationAlert to true to tap the corresponding alertSheetButton.
 
 NOTE: By default, "Delete" will be used as the alertSheetButtonId when the value is nil. If you need to tap a different button, simply set alertSheetButtonId to the id of the button you want to press in the alert sheet. 
 ```swift
@@ -650,7 +656,7 @@ final class MyUITests: BaseUITestCase {
 }
 ```
 ##### Third Party Alerts
-I'm going to be honest, this method can be a bit flaky. Unfortunatley dealing with third party alerts isn't as reliable as dealing with native iOS alerts. Still, if you need to tap a button on an alert presented by a third party, this is the method to use. 
+I'm going to be honest, this method can be a bit flaky. Unfortunately, dealing with third party alerts isn't as reliable as dealing with native iOS alerts. Still, if you need to tap a button on an alert presented by a third party, this is the method to use. 
 
 NOTE: Sometimes the app will need to be tapped in order to proceed. If you experience issues, toggle withAppTap and try again.
 ```swift
@@ -668,7 +674,7 @@ final class MyUITests: BaseUITestCase {
 ##### Type in textfield
 You can enter text in either a regular textfield or a secureField. You can clear the field text before typing, as well as tap the keyboard "Done" button when finished. 
 
-NOTE: By default, this method will tap the textfield before taking any action. If you expect the field to already be in focus, it may be best to set shouldTapFieldBeforeTyping to false to avoid problems.
+NOTE: By default, this method will tap the textfield before taking any action. If you expect the field to already be in focus, it may be best to set `tapFieldBeforeTyping` to false to avoid problems.
 
 ```swift
 import XCTest
