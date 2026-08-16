@@ -2,7 +2,7 @@
 # NnTestKit
 
 [![Swift Version](https://img.shields.io/badge/Swift-5.10%2B-orange.svg)](https://swift.org)
-![Platform](https://badgen.net/badge/platform/iOS%2015%2B%20%7C%20macOS%2012%2B/blue)
+![Platform](https://badgen.net/badge/platform/iOS%2017%2B%20%7C%20macOS%2013%2B/blue)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 NnTestKit is a Swift package that provides a collection of helper methods to simplify unit and UI testing in your iOS projects. It extends XCTest and Swift Testing frameworks to offer more convenient and powerful assertion methods, memory leak tracking with modern Swift macros, and UI testing utilities.
@@ -22,10 +22,13 @@ All test helper libraries should only be included as dependencies in test target
 - [Installation](#installation)
 - [Usage](#usage)
   - [Swift Testing Framework – Memory Leak Tracking](#swift-testing-framework--memory-leak-tracking)
+  - [Swift Testing Framework – Async State Helpers](#swift-testing-framework--async-state-helpers)
+    - [Waiting on a @Published Property](#waiting-on-a-published-property)
+    - [Waiting on an @Observable Property](#waiting-on-an-observable-property)
   - [XCTestCase Extensions](#xctestcase-extensions)
     - [Memory Leak Tracking](#memory-leak-tracking)
     - [Property Assertions](#property-assertions)
-  - [BaseUITestCase (UI Test Helpers)](#baseuittestcase-ui-test-helpers)
+  - [BaseUITestCase (UI Test Helpers)](#baseuitestcase-ui-test-helpers)
     - [Setup Helpers](#setup-helpers)
     - [Seeded UI Test Helpers](#seeded-ui-test-helpers)
     - [UI Element Helpers](#ui-element-helpers)
@@ -39,6 +42,8 @@ All test helper libraries should only be included as dependencies in test target
 - Property and array assertions
 - Error handling assertions (sync and async)
 - Swift Testing framework support
+- Async waiting on `@Published` properties via `waitUntil`
+- `@Observable` change-propagation testing via `observationStream` and `expectObservationFires`
 - UI test case setup and helper methods
 - Seeded UI test helpers for driving app state from UI tests via typed, `Codable` seed configs
 - Configurable default timeout for UI helpers via `UITestSeedDefaults.timeout`
@@ -49,7 +54,7 @@ All test helper libraries should only be included as dependencies in test target
 To add `NnTestKit` to your Xcode project, add the following dependency to your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/nikolainobadi/NnTestKit", from: "2.0.0")
+.package(url: "https://github.com/nikolainobadi/NnTestKit", from: "2.2.0")
 ```
 
 Then, add the appropriate libraries to your test target dependencies:
@@ -171,6 +176,86 @@ final class ViewModelTests {
     }
 }
 ```
+
+### Swift Testing Framework – Async State Helpers
+
+Swift Testing has no equivalent of `XCTestExpectation`, so asserting that state
+*eventually* reaches a value means writing your own polling loop. `NnSwiftTestingHelpers`
+provides two helpers for this — one for Combine's `@Published`, one for the Observation
+framework's `@Observable`.
+
+Both are `@MainActor` and both throw on timeout rather than failing inline, so you can
+`try await` them directly in a `@Test`.
+
+#### Waiting on a @Published Property
+
+`waitUntil(timeout:condition:)` suspends until the publisher emits a value satisfying the
+condition, or throws `PublisherError.timeout`. The default timeout is **1 second**.
+
+```swift
+import Testing
+import NnSwiftTestingHelpers
+@testable import MyModule
+
+@Test("Items load successfully")
+@MainActor
+func itemsLoad() async throws {
+    let viewModel = ItemsViewModel()
+
+    viewModel.loadItems()
+
+    try await viewModel.$items.waitUntil { $0.count == 3 }
+}
+```
+
+The extension is constrained to `Output: Equatable & Sendable`. For an arbitrary
+`Publisher` in an `XCTestCase`, use `waitForCondition` from `NnTestHelpers` instead.
+
+#### Waiting on an @Observable Property
+
+For `@Observable` types, `observationStream(of:)` bridges a property to an `AsyncStream`
+of post-change values, which you then await with `waitUntil`. Requires iOS 17+ / macOS 14+.
+
+```swift
+import Testing
+import NnSwiftTestingHelpers
+@testable import MyModule
+
+@Test("Items load via @Observable view model")
+@MainActor
+func itemsLoad() async throws {
+    let viewModel = ItemsViewModel()
+    let stream = observationStream(of: { viewModel.items })
+
+    viewModel.loadItems()
+
+    try await stream.waitUntil { $0.count == 3 }
+}
+```
+
+**Important:** the stream yields *only on changes* — it does not emit the current value on
+subscribe. Take the stream first, then trigger the mutation, or you'll wait for a change
+that already happened.
+
+When you only need to assert that a change *propagated* — through a wrapper, a computed
+property, a forwarding layer — without caring about the resulting value, use
+`expectObservationFires`:
+
+```swift
+@Test("Wrapper preserves observation propagation")
+@MainActor
+func wrapperFiresObservation() async {
+    let source = CounterModel()
+    let wrapper = CounterWrapper(source: source)
+
+    await expectObservationFires(when: {
+        source.count += 1
+    }, afterReading: wrapper.count)
+}
+```
+
+A timeout here becomes a failing `#expect` reported at your call site, rather than a
+thrown error.
 
 ### XCTestCase Extensions
 
@@ -454,7 +539,7 @@ final class MyUITests: BaseUITestCase {
     func testWaitForElement() {
         app.launch()
 
-        // Use default 3-second timeout
+        // Use the default timeout (UITestSeedDefaults.timeout, 10 seconds)
         let text = waitForElement(app.staticTexts, id: "myTextLabel").label
 
         // Or customize timeout for slow-loading elements
@@ -483,7 +568,7 @@ final class MyUITests: BaseUITestCase {
 ```
 
 ##### Date Picker Selection
-Easily change the date on a date picker. Currently, this method supports only changing selected day, or changing both the selected month and the selected day.
+Easily change the date on a date picker. `selectDate` supports changing just the selected day, or changing both the selected month and the selected day.
 
 ```swift
 import XCTest
@@ -500,6 +585,28 @@ final class MyUITests: BaseUITestCase {
         app.launch()
         // With optional timeout parameter
         selectDate(pickerId: "myDatePicker", currentMonth: "June", newMonth: "January", newDay: 15, timeout: 5)
+    }
+}
+```
+
+##### Time Picker Selection
+For a compact `DatePicker` configured with `displayedComponents: .hourAndMinute`, use `selectTime`. It taps the picker to open its inline overlay, adjusts the wheels, then taps again to dismiss.
+
+NOTE: wheel values are locale-dependent. A 12-hour locale expects an hour of 1–12 plus an AM/PM `period`; a 24-hour locale expects an hour of 0–23 and `period: nil`.
+
+```swift
+import XCTest
+import NnUITestHelpers
+
+final class MyUITests: BaseUITestCase {
+    func testSelectTime_twelveHourLocale() {
+        app.launch()
+        selectTime(pickerId: "reminderTimePicker", hour: "8", minute: "30", period: "AM")
+    }
+
+    func testSelectTime_twentyFourHourLocale() {
+        app.launch()
+        selectTime(pickerId: "reminderTimePicker", hour: "20", minute: "30")
     }
 }
 ```

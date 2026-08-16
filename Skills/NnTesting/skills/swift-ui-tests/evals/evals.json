@@ -1,0 +1,23 @@
+{
+  "skill_name": "swift-ui-tests",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Set up a UI test file for the Settings screen in this project. The app uses a tab bar with a Settings tab, has BaseUITestCase already set up, and has a SettingsAccessibility module with SettingsListAccessibilityId and SettingsDetailAccessibilityId enums. There's also a BaseProUserUITestCase for tests that need StoreKit. The UI test target is MyAppUITests/ with a Shared/ directory for base classes.",
+      "expected_output": "A complete, compilable UI test file (SettingsUITests.swift) with correct imports (XCTest, NnUITestHelpers, SettingsAccessibility), @MainActor final class inheriting BaseUITestCase, setUp calling super, a smoke test verifying the settings screen appears, and a private extension with a navigation helper. File should be placed in MyAppUITests/SettingsTests/.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Write UI tests for a task list feature. The test file TaskListUITests.swift already exists and inherits from BaseUITestCase. The app has a SeedConfig with fields: taskCount (Int), userRole (UserRole enum with .standard and .admin cases), and hasReachedLimit (Bool). There are accessibility IDs: TaskListAccessibilityId with cases addButton, filterToggle, emptyStateLabel, and TaskDetailAccessibilityId with cases nameField, saveButton, deleteButton. The base class has launchSeeded(config:) and there's a String extension with taskListId() and taskDetailId() helpers. Write tests covering: adding a task, trying to save without a name, reaching the task limit, and admin vs normal user permissions.",
+      "expected_output": "Multiple test methods using snake_case naming, each launching the app fresh via launchSeeded with appropriate SeedConfig, using NnTestKit helpers (tapButton, typeInField, elementAppeared, elementNotAppeared) with type-safe accessibility IDs (.taskListId(.addButton)), private helper methods for repeated sequences (launchAndNavigateToTaskList, addTask), and runStep for multi-phase tests. Tests should be behavioral (test_cannot_save_task_without_name, not test_tap_save_button_shows_error).",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I need to set up accessibility identifiers for a new ProfileScreen in my iOS app. The screen has: a profile image, username label, email label, edit button, logout button, and a list of linked accounts with an 'add account' button. Show me how to create the accessibility ID enum and the String extension for my UI tests. The project uses a separate ProfileAccessibility module.",
+      "expected_output": "A ProfileScreenAccessibilityId enum with String raw values for each element (profileImage, usernameLabel, emailLabel, editButton, logoutButton, linkedAccountRow, addAccountButton), placed in the ProfileAccessibility module. Plus a String extension with a static func profileScreenId(_ id: ProfileScreenAccessibilityId) -> String helper for the UI test target. Should follow the pattern of dedicated lightweight modules with no business logic dependencies.",
+      "files": []
+    }
+  ]
+}
