@@ -70,6 +70,7 @@ Every test file must define **exactly one** `makeSUT` helper.
 - `makeSUT` must return the System Under Test
 - `makeSUT` must live in a private extension
 - The extension must be placed at the bottom of the file
+- Other private extensions (Helpers, Test Doubles) go above the SUT extension
 - The extension must be labeled exactly `// MARK: - SUT`
 
 ---
