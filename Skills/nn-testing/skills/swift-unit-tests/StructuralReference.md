@@ -27,7 +27,7 @@ All Swift unit test files must declare imports at the top of the file, in the fo
 - `Testing` must always be imported
 - The module under test must always be imported using `@testable`
 - Additional imports are allowed only if strictly required by the tests
-- When memory leak tracking is required, `import NnSwiftTestingHelpers` is required
+- When memory leak tracking is required, the module that provides the leak-tracking helper must be imported (see section 6)
 - No unused imports are allowed
 
 ---
@@ -167,27 +167,22 @@ Rules:
 When memory leak tracking is required:
 
 - The test type must be a `final class`
-- `import NnSwiftTestingHelpers` must be added
-- The test type must be annotated with `@LeakTracked`
 - Leak tracking must be performed inside `makeSUT`
 - Leak tracking must not appear in test cases
 
-### Leak Tracking Helper Call Shape
+### Call-Site Forwarding
 
-Required `makeSUT` parameters:
+Leak failures must point at the test that created the SUT, not at `makeSUT`. So:
 
-- `fileID: String = #fileID`
-- `filePath: String = #filePath`
-- `line: Int = #line`
-- `column: Int = #column`
-
-These parameters must always be the **final parameters** in the `makeSUT` signature.
-
-Required call form:
-
-- `trackForMemoryLeaks(sut, fileID: fileID, filePath: filePath, line: line, column: column)`
+- `makeSUT` takes the call-site location (file, line, and whatever else the leak-tracking helper accepts) as parameters
+- These parameters must always be the **final parameters** in the `makeSUT` signature
+- `makeSUT` forwards them unchanged to the leak-tracking helper
 
 Forbidden:
-- Calling `trackForMemoryLeaks(sut)` without forwarding call-site parameters
+- Calling the leak-tracking helper without forwarding the call-site parameters
 - Constructing call-site values inside `makeSUT`
-- Reordering leak tracking parameters ahead of scenario parameters
+- Reordering call-site parameters ahead of scenario parameters
+
+### Library-Specific Rules
+
+The exact import, test-type annotation, parameter list, and call form depend on the leak-tracking library. Follow the **Leak-Tracking Library** section of this skill's `SKILL.md` before writing or revising a `makeSUT` that tracks leaks.

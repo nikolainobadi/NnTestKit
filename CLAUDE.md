@@ -108,18 +108,35 @@ func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> MyClass {
 non-`mutating` method, so the decorated type **must be a class**. Applying
 `@LeakTracked` to a `struct` will not compile.
 
-## The Skill (`Skills/NnTesting`)
+## The Skills (`Skills/`)
 
-The published API reference for this package lives in this repo, at
-`Skills/NnTesting`. It is not a copy of documentation kept elsewhere — it *is*
-the source of truth, consumed by every project that installs the `NnTesting`
-plugin.
+The published skills for this package live in this repo, in two plugins. They
+are not copies of documentation kept elsewhere — they *are* the source of truth,
+consumed by every project that installs them.
 
-| Skill | Covers |
-|---|---|
-| `skills/NnTestKit` | The API reference — `UnitTestApi.md`, `SwiftTestingApi.md`, `UITestApi.md` |
-| `skills/swift-unit-tests` | Unit test conventions and workflows |
-| `skills/swift-ui-tests` | UI test conventions, seeding, accessibility identifiers |
+| Plugin | Skill | Covers |
+|---|---|---|
+| `Skills/nn-testing` | `skills/swift-unit-tests` | Unit test conventions and workflows — library-neutral, no NnTestKit APIs |
+| `Skills/NnTesting` | `skills/NnTestKit` | The API reference — `UnitTestApi.md`, `SwiftTestingApi.md`, `UITestApi.md` — plus `LeakTrackingConventions.md` |
+| `Skills/NnTesting` | `skills/swift-ui-tests` | UI test conventions, seeding, accessibility identifiers (built on `BaseUITestCase`) |
+
+### Two layers
+
+`NnTesting`'s `plugin.json` declares `"dependencies": ["nn-testing"]`, the same
+base/dependent shape as nnscaffold's `nn-architecture` → `nn-cli-architecture`.
+A project that can't depend on NnTestKit installs `nn-testing` alone and gets
+the unit-test conventions without any NnTestKit skill. A project that uses
+NnTestKit installs `NnTesting` and gets both.
+
+**Layering rule:** a convention that names an NnTestKit API (`@LeakTracked`,
+`trackForMemoryLeaks`, `NnSwiftTestingHelpers`, …) belongs in the `NnTestKit`
+skill. `swift-unit-tests` states the principle and routes there from one
+place — the "Leak-Tracking Library" section of its `SKILL.md`. Keep
+`Skills/nn-testing` free of NnTestKit APIs.
+
+`swift-ui-tests` stays in `NnTesting` on purpose: its examples are built on
+`BaseUITestCase` helpers throughout, and projects without NnTestKit rarely
+write UI tests.
 
 ### It lives here so it changes with the API
 
@@ -128,26 +145,24 @@ and its documentation change were two PRs in two repos — a convention with no
 enforcement point. It drifted, repeatedly. Co-locating them makes the API change
 and the doc change the same diff, reviewed together.
 
-**Any PR that changes the public API must also update `Skills/`.** The
-`.github/workflows/skill-docs.yml` check enforces this: it fails a PR that
-touches `public`/`open`/`package` declarations under `Sources/` without touching
-anything under `Skills/`. If a PR genuinely changes no documented behavior
-(reformatting, an internal rename, moving a file), add the `skip-skill-check`
-label to waive it.
+**Any PR that changes the public API must also update `Skills/`.** No CI check
+enforces this; it is a review convention.
 
-### `plugin.json` deliberately has no `version`
+### `plugin.json` `version` is written by nnex
 
-`Skills/NnTesting/.claude-plugin/plugin.json` intentionally omits the `version`
-field. **Do not reintroduce it.** Git-based plugin sources key their cache by
-commit sha, so the field is never read — it is a hand-typed number that nothing
-verifies and nothing updates, which recreates exactly the stale-number problem
-the co-location was meant to end. The marketplace `ref` (below) is the real
-version pin.
+`nnex ship package` sets the `version` field in both
+`Skills/nn-testing/.claude-plugin/plugin.json` and
+`Skills/NnTesting/.claude-plugin/plugin.json` to the release tag on every
+release. **Do not edit it by hand.** Claude Code reads this field first when
+deciding whether an installed plugin has an update, so a hand-typed number that
+falls behind keeps consumers on an old copy. Because nnex writes it alongside the
+marketplace `ref` (below), the two always name the same release.
 
 ## Releasing
 
-The marketplace entry for this skill is **pinned to a release tag**, not to a
-branch:
+Releases go through `nnex ship package`, which tags the release and publishes
+the skills. Both plugins have their own marketplace entry, each **pinned to the
+same release tag**, not to a branch:
 
 ```jsonc
 // nn-swift-skills/.claude-plugin/marketplace.json
@@ -159,6 +174,15 @@ branch:
     "path": "Skills/NnTesting",
     "ref": "2.2.1"          // <- bumped on every release
   }
+},
+{
+  "name": "nn-testing",
+  "source": {
+    "source": "git-subdir",
+    "url": "https://github.com/nikolainobadi/NnTestKit.git",
+    "path": "Skills/nn-testing",
+    "ref": "2.2.1"          // <- bumped on every release, same tag
+  }
 }
 ```
 
@@ -168,36 +192,9 @@ moves. This surprises people who just merged a correction and can't see it. It
 is the intended trade: what consumers read always describes a version they can
 actually depend on.
 
-The bump is automated. `.github/workflows/skill-ref-bump.yml` fires on tag push,
-rewrites the `ref` in `nikolainobadi/nn-swift-skills`, and opens a PR there.
-
-**If that automation is ever removed, the bump becomes a manual cross-repo step**
-— and this is the failure mode to know about: an unbumped `ref` serves the
-previous release's documentation forever. Nothing errors and nothing warns. The
-`skill-docs.yml` check cannot see it either; that check only guards "API changed
-without `Skills/` updated." So the ref-bump workflow is not optional.
-
-### The `MARKETPLACE_TOKEN` secret
-
-`skill-ref-bump.yml` needs a repo secret `MARKETPLACE_TOKEN`: a fine-grained
-token with `contents:write` and `pull-requests:write` on
-`nikolainobadi/nn-swift-skills`, and nothing else.
-
-**It is shared across every package repo that publishes to that marketplace**
-(SwiftPickerKit, NnArgumentParser, this one, …). The grant is identical in each,
-so a per-package token would buy no reduction in blast radius and cost another
-expiry date to track.
-
-The corollary is that **rotation is fan-out**: when it expires or is revoked, the
-bump breaks in *every* repo holding it, and each needs `gh secret set` again. A
-failed ref-bump run complaining about the token almost always means "rotate the
-shared token," not "this repo's workflow is broken."
-
-| | |
-|---|---|
-| Token name | `nn-swift-skills-ref-bump` (named for what it grants, not for a holder) |
-| Expiry | _record the expiry date here when the token is next rotated_ |
-| Scope | `contents:write`, `pull-requests:write` on `nikolainobadi/nn-swift-skills` only |
-
-Never substitute a `gh auth token` for this — those typically carry `repo` scope
-across the whole account, turning a two-permission grant into a total one.
+**The failure mode to know about:** an unbumped `ref` serves the previous
+release's documentation forever. Nothing errors and nothing warns. Both skill
+folders (`Skills/NnTesting` and `Skills/nn-testing`) are listed as the target's
+`skills` in `.nnex/nnex.json`, so every `nnex ship package` publishes both. If
+`Skills/nn-testing` ever drops out of that list, the unit-test conventions go
+silently stale.

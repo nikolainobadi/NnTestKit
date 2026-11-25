@@ -92,38 +92,4 @@ private extension FeatureTests {
 
 ---
 
-## Example 6: Reference-Type SUT With Leak Tracking
-
-```swift
-import Testing
-import NnSwiftTestingHelpers
-@testable import MyFeatureKit
-
-@LeakTracked
-final class FeatureTests {
-}
-
-
-// MARK: - SUT
-private extension FeatureTests {
-    func makeSUT(
-        fileID: String = #fileID,
-        filePath: String = #filePath,
-        line: Int = #line,
-        column: Int = #column
-    ) -> (sut: Feature, delegate: MockDelegate) {
-        let delegate = MockDelegate()
-        let sut = Feature(delegate: delegate)
-
-        trackForMemoryLeaks(
-            sut,
-            fileID: fileID,
-            filePath: filePath,
-            line: line,
-            column: column
-        )
-
-        return (sut, delegate)
-    }
-}
-```
+A leak-tracking `makeSUT` depends on the leak-tracking library, so its example lives with that library. See the **Leak-Tracking Library** section of this skill's `SKILL.md`.

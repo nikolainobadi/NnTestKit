@@ -75,7 +75,7 @@ Deterministic, behavior-preserving transformations with no wording or design cho
 - A duplicated setup-and-assertion literal → a single named local referenced in both places (Input Identity)
 - Import ordering and removal of unused imports
 - `makeSUT` relocated to a bottom private extension labeled exactly `// MARK: - SUT`
-- Leak-tracking call-site parameters reordered to be the final `makeSUT` parameters; `trackForMemoryLeaks(sut)` → the full call-site-forwarding form
+- Leak-tracking call-site parameters reordered to be the final `makeSUT` parameters; a leak-tracking call that doesn't forward them → the full call-site-forwarding form (`StructuralReference.md` section 6)
 - Comments inside test cases removed
 
 ### Bucket B — Judgment call (propose, then confirm)

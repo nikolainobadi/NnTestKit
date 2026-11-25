@@ -31,6 +31,18 @@ Unified skill for setting up and writing Swift unit tests following canonical co
 | `MakeSutExamples.md` | Illustrative makeSUT usage patterns |
 | `MockInvariantTest.md` | Example of the single allowed invariant test |
 
+These conventions name no third-party helper library.
+
+---
+
+## Leak-Tracking Library
+
+Before writing or revising a `makeSUT` that tracks leaks, check whether the test target depends on the NnTestKit package (`Package.swift` or the Xcode project's package dependencies).
+
+- **It does:** load the **NnTestKit** skill and read its `LeakTrackingConventions.md` completely. It governs the import, the test-type annotation, the `makeSUT` parameters, and the call form.
+- **It does, but the NnTestKit skill is not available:** stop and tell the user to install the `NnTesting` plugin. Do not write the call form from memory.
+- **It does not:** use the project's own leak-tracking helper under `StructuralReference.md` section 6. If there is none, ask the user before adding leak tracking.
+
 ---
 
 ## Examples

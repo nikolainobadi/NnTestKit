@@ -1,0 +1,5 @@
+{
+  "name": "nn-testing",
+  "description": "Library-neutral Swift unit test conventions: test file structure, makeSUT, mocks, test writing, and test file location. Works with or without NnTestKit.",
+  "author": { "name": "Nikolai Nobadi" }
+}

@@ -1,5 +1,6 @@
 {
   "name": "NnTesting",
-  "description": "Swift testing plugin — NnTestKit API reference and unit test workflow engine for iOS/macOS projects.",
+  "description": "NnTestKit testing plugin — NnTestKit API reference, NnTestKit leak-tracking conventions, and UI test workflows built on BaseUITestCase. Unit test conventions come from the nn-testing dependency.",
+  "dependencies": ["nn-testing"],
   "author": { "name": "Nikolai Nobadi" }
 }
