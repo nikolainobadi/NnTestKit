@@ -249,6 +249,7 @@ When the test exists specifically to verify a literal value — for example, a d
 - When a test uses only the SUT, bind it through the tuple accessor: `let sut = makeSUT().sut`
 - When a test uses only a dependency, bind it the same way: `let delegate = makeSUT().delegate`
 - When a test uses the SUT together with one or more dependencies, destructure them in a single binding: `let (sut, delegate) = makeSUT()`
+- When a test uses two or more dependencies but not the SUT, bind the tuple once and read each dependency from it: `let result = makeSUT()`, then `result.delegate` and `result.cache`. Do not call `makeSUT()` once per dependency; each call builds a separate setup, so the dependencies would not belong to the same scenario
 - Discarding a tuple element with a `_` placeholder is not allowed
 
 ### Rationale
@@ -273,7 +274,7 @@ Before constructing any data model in a test:
 
 - The test must first check whether a factory method already exists
 - Known factory locations (e.g. `TestFactory.swift` or equivalent test helpers) must be searched before using direct initialization
-- The model must not assume a factory exists without verifying it
+- You must not assume a factory exists without verifying it
 
 If a factory method exists, it must be used.
 
@@ -296,10 +297,10 @@ The absence of a factory does **not** justify guessing initializer behavior.
 
 When no factory exists:
 
-- The model must inspect the data model directly
+- You must inspect the data model directly
 - Initializers, defaults, and invariants must be derived from the source, not inferred
 - Constructor parameters must not be guessed or hallucinated
-- If required information cannot be determined safely, the model must stop and ask
+- If required information cannot be determined safely, you must stop and ask
 
 ### Factory Responsibilities
 

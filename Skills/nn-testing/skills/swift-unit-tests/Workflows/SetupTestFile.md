@@ -109,15 +109,16 @@ File creation is mandatory when the file does not exist.
 
 Once the test file is located **or** created:
 
-- Read `StructuralReference.md` before applying any structural rules
-- Apply the canonical rules from `StructuralReference.md`
+- Read `StructuralReference.md` and `MockRules.md` completely before applying any structural rules
+- Apply the canonical rules from both
 
 `StructuralReference.md` defines:
 - Imports and ordering
 - Test type selection
 - `makeSUT` rules
-- Mock construction rules
 - Leak tracking requirements
+
+`MockRules.md` defines mock construction, configuration, state, and sharing rules.
 
 If anything in this workflow conflicts with `StructuralReference.md`, `StructuralReference.md` wins.
 

@@ -12,7 +12,7 @@ For full rules, see `StructuralReference.md` section 5.
 ```swift
 @Test
 func `Starting values are empty`() {
-    let (_, delegate) = makeSUT()
+    let delegate = makeSUT().delegate
 
     #expect(delegate.savedPresets.isEmpty)
 }
@@ -27,11 +27,11 @@ When multiple mocks or multiple observable properties exist, a single test may i
 ```swift
 @Test
 func `Starting values are empty`() {
-    let (_, delegate, cache) = makeSUT()
+    let delegate = makeSUT().delegate
 
     #expect(delegate.savedPresets.isEmpty)
-    #expect(delegate.didSave == false)
-    #expect(cache.cachedValues.isEmpty)
+    #expect(!delegate.didSave)
+    #expect(delegate.cachedValues.isEmpty)
 }
 ```
 

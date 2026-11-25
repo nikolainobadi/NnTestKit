@@ -158,7 +158,7 @@ Rules:
 - Only one invariant test is permitted per test file
 - The test must assert **only baseline state**
 - The test must not exercise the SUT or validate behavior
-- This is the **only test** the setup skill is permitted to generate
+- This is the **only test** the setup workflow is permitted to generate
 
 ---
 

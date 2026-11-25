@@ -54,13 +54,11 @@ private extension FeatureTests {
         isEnabled: Bool = true,
         cachedValue: String? = nil
     ) -> (sut: Feature, delegate: MockDelegate) {
-        let cache = MockCache(value: cachedValue)
-        let logger = MockLogger()
+        let store = InMemoryStore(value: cachedValue)
         let delegate = MockDelegate(isEnabled: isEnabled)
 
         let sut = Feature(
-            cache: cache,
-            logger: logger,
+            store: store,
             delegate: delegate
         )
 

@@ -70,7 +70,7 @@ Deterministic, behavior-preserving transformations with no wording or design cho
 - `@Test func` inline → `@Test` on its own line
 - `#expect(x == true)` → `#expect(x)`; `#expect(x == false)` → `#expect(!x)`
 - Optional chaining or optional comparison inside `#expect(...)` → `try #require` unwrap into a named local, then assert on the local; add `throws` to the signature
-- `_` tuple placeholders in `makeSUT()` bindings → bind only used elements via the tuple accessor (`let sut = makeSUT().sut`)
+- `_` tuple placeholders in `makeSUT()` bindings → bind only used elements via the tuple accessor (`let sut = makeSUT().sut`), or, when several dependencies are used without the SUT, bind the tuple once (`let result = makeSUT()`) and read from it
 - Inline SUT/dependency/mock construction inside a test → routed through `makeSUT`
 - A duplicated setup-and-assertion literal → a single named local referenced in both places (Input Identity)
 - Import ordering and removal of unused imports
