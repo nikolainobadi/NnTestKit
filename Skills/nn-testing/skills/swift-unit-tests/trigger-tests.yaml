@@ -1,0 +1,33 @@
+skill: swift-unit-tests
+runs: 3
+pass: 2
+cases:
+  - prompt: "Write unit tests for NetworkClient"
+    expect: fires
+  - prompt: "Set up tests for MyFeatureManager"
+    expect: fires
+  - prompt: "SessionStore has zero coverage. Can you add some?"
+    expect: fires
+  - prompt: "Cover the edge cases in PaymentValidator with XCTest"
+    expect: fires
+  - prompt: "The makeSUT in OrderManagerTests is a mess and the mocks are shared between cases, clean it up"
+    expect: fires
+  - prompt: "Nothing checks SyncEngine's retry logic yet. Pin down its behavior so a regression gets caught before I open the PR."
+    expect: fires
+  - prompt: "What's the difference between XCTest and Swift Testing?"
+    expect: silent
+  - prompt: "My test target fails to build with 'No such module NnTestKit'. Fix Package.swift."
+    expect: silent
+  - prompt: "Run the test suite and tell me which tests fail"
+    expect: silent
+  - prompt: "Add a GitHub Actions workflow that runs swift test on every PR"
+    expect: silent
+  - prompt: "Write a UI test that taps through the onboarding screens"
+    expect: other
+    winner: swift-ui-tests
+  - prompt: "Add accessibility identifiers so the login flow can be driven from XCUITest"
+    expect: other
+    winner: swift-ui-tests
+  - prompt: "How do I use expectObservationFires to test an @Observable model?"
+    expect: other
+    winner: NnTestKit

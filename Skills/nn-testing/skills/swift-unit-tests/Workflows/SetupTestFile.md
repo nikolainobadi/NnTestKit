@@ -12,6 +12,18 @@ Do not:
 - Create new test target folders
 - Create unit tests for SwiftUI Views
 
+## Contents
+
+- Execution Order (Strict)
+- Step 1: Identify What Is Being Tested
+- Step 1a: View Exclusion Rule (Hard Stop)
+- Step 2: Locate an Existing Test File
+- Step 3: Create the Test File (Only If Missing)
+- Step 4: Apply Structural Rules
+- Your Task
+- Output Rules
+- Absolute Constraints
+
 ---
 
 ## Execution Order (Strict)
@@ -53,8 +65,6 @@ A type is a View if **any** of the following are true:
 
 - The type conforms to `SwiftUI.View` (has a `body` property returning `some View`)
 - The type conforms to `UIViewRepresentable` or `UIViewControllerRepresentable`
-- The type imports `SwiftUI` and declares a `var body: some View` property
-- The source file contains `import SwiftUI` and the type has `@ViewBuilder` annotations
 
 A type is **not** a View if:
 
@@ -119,6 +129,8 @@ Once the test file is located **or** created:
 - Leak tracking requirements
 
 `MockRules.md` defines mock construction, configuration, state, and sharing rules.
+
+When writing a new `makeSUT`, or changing the parameters or return shape of an existing one, also read `MakeSutExamples.md`. It is illustrative only; if it cannot be read, continue from `StructuralReference.md` alone.
 
 If anything in this workflow conflicts with `StructuralReference.md`, `StructuralReference.md` wins.
 

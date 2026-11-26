@@ -6,6 +6,16 @@ This workflow audits a test file that already exists, then revises it so its str
 
 This workflow must never create a new test file. If the file does not exist, route to `SetupTestFile` instead.
 
+## Contents
+
+- Behavior Preservation (Hard Rule)
+- Preconditions
+- Canonical Rules
+- Step 1: Audit
+- Step 2: Apply
+- Step 3: Verify
+- Output Rules
+
 ---
 
 ## Behavior Preservation (Hard Rule)
@@ -52,7 +62,9 @@ Revision spans structure, test writing, and test doubles. You must read **all th
 - `TestWritingReference.md`
 - `MockRules.md`
 
-This is mandatory, not conditional. Treat these documents as the single source of truth. Do not deviate, reinterpret, or weaken any rule. If this workflow conflicts with them, they win.
+When a fix changes the parameters or return shape of `makeSUT`, also read `MakeSutExamples.md`. It is illustrative only; the three references above win over it.
+
+The three references are mandatory, not conditional. Treat these documents as the single source of truth. Do not deviate, reinterpret, or weaken any rule. If this workflow conflicts with them, they win.
 
 ---
 

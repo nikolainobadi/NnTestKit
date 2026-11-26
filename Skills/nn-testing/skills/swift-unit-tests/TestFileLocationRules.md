@@ -13,6 +13,18 @@ It does **not** define test structure, imports, or `makeSUT` behavior.
 If a model cannot confidently determine a correct location using these rules,
 it must stop and ask the user to specify the test target path.
 
+## Contents
+
+- 1. Scope and Responsibility
+- 2. Test Target Folder Definition
+- 3. Test Target Discovery Rules
+- 4. Subfolder Creation Rules
+- 5. Test File Naming Rules
+- 6. File Existence Rules
+- 7. Mandatory File Creation
+- 8. Failure Conditions
+- Authority and Precedence
+
 ---
 
 ## 1. Scope and Responsibility

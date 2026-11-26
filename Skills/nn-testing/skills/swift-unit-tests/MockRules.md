@@ -4,6 +4,16 @@ This document defines the canonical rules for mock construction, configuration, 
 
 All mocks created during setup must follow these rules. If anything conflicts with `StructuralReference.md`, `StructuralReference.md` wins.
 
+## Contents
+
+- Construction
+- Mock Consolidation
+- Property Modeling
+- State Invariants
+- Error Handling
+- Configuration Boundary
+- Placement and Sharing
+
 ---
 
 ## Construction

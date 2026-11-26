@@ -13,6 +13,15 @@ Illustrative examples live alongside this file:
 - `MakeSutExamples.md` for construction patterns
 - `MockInvariantTest.md` for the single allowed invariant test
 
+## Contents
+
+- 1. Imports
+- 2. Test Type
+- 3. `makeSUT`
+- 4. Mock and Test Double Rules
+- 5. Allowed Invariant Test (Single Exception)
+- 6. Leak Tracking and Lifecycle Management
+
 ---
 
 ## 1. Imports
@@ -119,6 +128,8 @@ Dependencies and mocks must also be returned when:
 Allowed return shapes:
 - The SUT alone
 - A tuple containing the SUT and one or more dependencies or mocks
+
+A tuple return must label every element. The System Under Test is labeled `sut`; each dependency or mock is labeled by its role (for example `delegate`).
 
 Tests must not recreate or access dependencies through other means.
 

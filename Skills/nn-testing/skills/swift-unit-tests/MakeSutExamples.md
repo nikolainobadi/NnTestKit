@@ -75,15 +75,15 @@ private extension FeatureTests {
 private extension FeatureTests {
     func makeSUT(
         hasAccess: Bool = true,
-        errorOnSave: Bool = false
-    ) -> (sut: Feature, repository: MockRepository) {
-        let repository = MockRepository(
+        throwError: Bool = false
+    ) -> (sut: Feature, delegate: MockDelegate) {
+        let delegate = MockDelegate(
             hasAccess: hasAccess,
-            errorOnSave: errorOnSave
+            throwError: throwError
         )
 
-        let sut = Feature(repository: repository)
-        return (sut, repository)
+        let sut = Feature(delegate: delegate)
+        return (sut, delegate)
     }
 }
 ```
