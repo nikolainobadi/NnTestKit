@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- The `NnTesting` plugin now contains only the `NnTestKit` API reference skill. The `swift-unit-tests` and `swift-ui-tests` skills were removed from it and are no longer published from this repo, so the skill ids `NnTesting:swift-unit-tests` and `NnTesting:swift-ui-tests` stop resolving
+- NnTestKit-specific leak-tracking conventions (`@LeakTracked`, the `makeSUT` call-site parameters, the `trackForMemoryLeaks` call form) moved into the `NnTestKit` skill as `LeakTrackingConventions.md`
+
 ## [2.2.1] - 2026-08-16
 
 Documentation and tooling release. No public API changes.

@@ -1,0 +1,12 @@
+{
+  "targets" : [
+    {
+      "name" : "NnTestKit",
+      "path" : ".",
+      "skills" : [
+        "Skills/NnTesting"
+      ],
+      "targetType" : "library"
+    }
+  ]
+}

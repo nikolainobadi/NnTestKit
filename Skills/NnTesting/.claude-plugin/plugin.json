@@ -1,5 +1,5 @@
 {
   "name": "NnTesting",
-  "description": "Swift testing plugin — NnTestKit API reference and unit test workflow engine for iOS/macOS projects.",
+  "description": "NnTestKit testing plugin — NnTestKit API reference and NnTestKit leak-tracking conventions.",
   "author": { "name": "Nikolai Nobadi" }
 }

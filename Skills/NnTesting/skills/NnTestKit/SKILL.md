@@ -19,6 +19,7 @@ Testing utilities for iOS/macOS projects — XCTest extensions, Swift Testing he
 | `UnitTestApi.md` | XCTest extensions — memory leak tracking, assertions, publisher testing, test environment detection | Writing XCTest unit tests |
 | `SwiftTestingApi.md` | @LeakTracked macro, TrackableObject, Combine + Observation helpers for Swift Testing | Writing Swift Testing tests |
 | `UITestApi.md` | BaseUITestCase — element waiting/interaction, buttons, text input, date pickers, assertions, seeding helpers | Writing UI tests |
+| `LeakTrackingConventions.md` | Leak-tracking conventions with NnTestKit — `@LeakTracked`, `makeSUT` call-site parameters, required `trackForMemoryLeaks` form | Writing or revising a `makeSUT` that tracks leaks |
 
 ## Quick Reference
 
@@ -35,5 +36,6 @@ Testing utilities for iOS/macOS projects — XCTest extensions, Swift Testing he
 
 - "How do I track memory leaks in my XCTest?" -> Loads `UnitTestApi.md`
 - "Set up a Swift Testing suite with leak tracking" -> Loads `SwiftTestingApi.md`
+- "Add leak tracking to this suite's makeSUT" -> Loads `LeakTrackingConventions.md`
 - "Write a UI test that taps a button and verifies text" -> Loads `UITestApi.md`
 - "Seed a UI test with a typed config and a unique test user" -> Loads `UITestApi.md`
