@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-11-27
+
 ### Changed
-- The `NnTesting` plugin now contains only the `NnTestKit` API reference skill. The `swift-unit-tests` and `swift-ui-tests` skills were removed from it and are no longer published from this repo, so the skill ids `NnTesting:swift-unit-tests` and `NnTesting:swift-ui-tests` stop resolving
+- The `NnTesting` plugin now contains only the `NnTestKit` API reference skill
 - NnTestKit-specific leak-tracking conventions (`@LeakTracked`, the `makeSUT` call-site parameters, the `trackForMemoryLeaks` call form) moved into the `NnTestKit` skill as `LeakTrackingConventions.md`
+
+### Removed
+- **BREAKING**: The `swift-unit-tests` and `swift-ui-tests` skills were removed from the `NnTesting` plugin and are no longer published from this repo, so the skill ids `NnTesting:swift-unit-tests` and `NnTesting:swift-ui-tests` stop resolving. Use the separately maintained unit and UI testing plugins for those conventions and workflows
 
 ## [2.2.1] - 2026-08-16
 
@@ -159,7 +164,8 @@ Documentation and tooling release. No public API changes.
 - Swift 5.5 support with iOS 15+ and macOS 12+ platform requirements
 - Comprehensive README documentation
 
-[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/2.3.0...HEAD
+[2.3.0]: https://github.com/nikolainobadi/NnTestKit/compare/2.2.1...2.3.0
 [2.2.0]: https://github.com/nikolainobadi/NnTestKit/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/nikolainobadi/NnTestKit/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/nikolainobadi/NnTestKit/compare/v1.4.1...v2.0.0

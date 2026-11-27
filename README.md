@@ -60,7 +60,7 @@ All test helper libraries should only be included as dependencies in test target
 To add `NnTestKit` to your Xcode project, add the following dependency to your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/nikolainobadi/NnTestKit", from: "2.2.0")
+.package(url: "https://github.com/nikolainobadi/NnTestKit", from: "2.3.0")
 ```
 
 Then, add the appropriate libraries to your test target dependencies:
