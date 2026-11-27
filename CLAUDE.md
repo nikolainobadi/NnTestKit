@@ -110,7 +110,7 @@ non-`mutating` method, so the decorated type **must be a class**. Applying
 
 ## The Skills (`Skills/`)
 
-The published skills for this package live in this repo, in two plugins. They
+The published skills for this package live in this repo, in three plugins. They
 are not copies of documentation kept elsewhere — they *are* the source of truth,
 consumed by every project that installs them.
 
@@ -118,18 +118,18 @@ consumed by every project that installs them.
 |---|---|---|
 | `Skills/nn-testing` | `skills/swift-unit-tests` | Unit test conventions and workflows — library-neutral, no NnTestKit APIs |
 | `Skills/NnTesting` | `skills/NnTestKit` | The API reference — `UnitTestApi.md`, `SwiftTestingApi.md`, `UITestApi.md` — plus `LeakTrackingConventions.md` |
-| `Skills/nn-testing` | `skills/swift-ui-tests` | UI test conventions, seeding, accessibility identifiers (built on `BaseUITestCase`) |
+| `Skills/nn-ui-testing` | `skills/swift-ui-tests` | UI test conventions, seeding, accessibility identifiers (built on `BaseUITestCase`) |
 
-### Two layers
+### Independent plugins
 
-The two plugins are independent: neither declares the other in
-`"dependencies"`, and `NnTesting` does not mention `nn-testing` at all. A
-project installs either or both.
+The three plugins are independent: none declares another in
+`"dependencies"`, and `NnTesting` does not mention `nn-testing` or
+`nn-ui-testing` at all. A project installs any combination.
 
-`nn-testing` may refer to the `NnTestKit` skill, but only as optional: every
-reference says what to do when that skill is not installed (read the details
-from the project's existing tests or the resolved NnTestKit package source).
-An `nn-testing` skill must never stop because `NnTesting` is missing.
+`nn-testing` and `nn-ui-testing` may refer to the `NnTestKit` skill, but only as
+optional: every reference says what to do when that skill is not installed
+(read the details from the project's existing tests or the resolved NnTestKit
+package source). Their skills must never stop because `NnTesting` is missing.
 
 **Layering rule:** a convention that names an NnTestKit API (`@LeakTracked`,
 `trackForMemoryLeaks`, `NnSwiftTestingHelpers`, …) belongs in the `NnTestKit`
@@ -137,10 +137,10 @@ skill. `swift-unit-tests` states the principle and routes there, optionally, fro
 place — the "Leak-Tracking Library" section of its `SKILL.md`. Keep
 `swift-unit-tests` free of NnTestKit APIs.
 
-`swift-ui-tests` is the exception: it lives in `nn-testing` alongside
-`swift-unit-tests` so both test-convention skills ship as one plugin, even
-though its examples are built on `BaseUITestCase` helpers throughout. For API
-details it routes to the `NnTestKit` skill's `UITestApi.md`.
+`swift-ui-tests` is built on `BaseUITestCase` helpers throughout, so it lives in
+its own plugin, `nn-ui-testing`, and installs separately from
+`swift-unit-tests`. It states conventions only; NnTestKit API facts belong in
+`UITestApi.md`, and the skill points there.
 
 ### It lives here so it changes with the API
 
@@ -197,8 +197,8 @@ is the intended trade: what consumers read always describes a version they can
 actually depend on.
 
 **The failure mode to know about:** an unbumped `ref` serves the previous
-release's documentation forever. Nothing errors and nothing warns. Both skill
-folders (`Skills/NnTesting` and `Skills/nn-testing`) are listed as the target's
-`skills` in `.nnex/nnex.json`, so every `nnex ship package` publishes both. If
-`Skills/nn-testing` ever drops out of that list, the unit-test conventions go
+release's documentation forever. Nothing errors and nothing warns. All three skill
+folders (`Skills/NnTesting`, `Skills/nn-testing`, and `Skills/nn-ui-testing`) are
+listed as the target's `skills` in `.nnex/nnex.json`, so every `nnex ship package`
+publishes all three. If a folder ever drops out of that list, its conventions go
 silently stale.

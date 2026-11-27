@@ -1,5 +1,5 @@
 {
   "name": "nn-testing",
-  "description": "Swift test conventions: unit test structure, makeSUT, mocks, test writing, and test file location (swift-unit-tests), plus XCUITest structure, accessibility identifiers, seeding, and user-flow tests built on NnTestKit's BaseUITestCase (swift-ui-tests).",
+  "description": "Library-neutral Swift unit test conventions: test file structure, makeSUT, mocks, test writing, and test file location. Works with or without NnTestKit.",
   "author": { "name": "Nikolai Nobadi" }
 }

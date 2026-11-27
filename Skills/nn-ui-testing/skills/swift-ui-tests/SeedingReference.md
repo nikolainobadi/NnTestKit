@@ -58,24 +58,7 @@ launchSeeded(config: SeedConfig(userRole: .admin, itemCount: 5))
 
 ## NnTestKit Seeding Helpers
 
-NnTestKit provides built-in infrastructure for Tier 2 seeding. For full API details, see the `NnTestKit` skill's `UITestApi.md` when that skill is available, otherwise the `BaseUITestCase` source in the resolved NnTestKit package.
-
-### Key Methods
-
-| Method | What It Does |
-|--------|-------------|
-| `launchSeeded(config:envKeys:)` | Encodes config, generates unique `runId` + test email, launches app |
-| `setSeedConfig(_:envKeys:)` | Same setup but does NOT launch (use when login flow owns the launch) |
-| `mainUserEmail` | The generated test user email for this run |
-| `seedEmail(for:)` | Expected email for additional seeded users |
-
-### How It Works
-
-1. `launchSeeded` generates a unique 8-char `runId` per test run
-2. It creates a test user email: `tester+<runId>@uitest.local`
-3. It JSON-encodes your `SeedConfig` and places it in `UITEST_SEED_CONFIG`
-4. It calls `app.launch()`
-5. The app reads `UITestSeedContext.fromEnvironment()` and runs a seeder before showing UI
+NnTestKit provides built-in infrastructure for Tier 2 seeding: `launchSeeded(config:envKeys:)` launches with a seed config, `setSeedConfig(_:envKeys:)` prepares one without launching (use it when a login flow owns the launch), and `mainUserEmail` / `seedEmail(for:)` give the seeded users' emails. For signatures, the generated `runId` and email format, and the environment keys set, see the `NnTestKit` skill's `UITestApi.md` when that skill is available, otherwise the `BaseUITestCase` source in the resolved NnTestKit package.
 
 ### Combining Both Tiers
 
