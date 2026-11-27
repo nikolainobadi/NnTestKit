@@ -21,3 +21,13 @@ Next test: failed again
 No fix recorded.
 
 Next test: failed again
+
+## 2026-11-26 16:23 · 1 of 13 cases failed
+- Model: claude-sonnet-5-5 · Runs per case: 3
+- Case 3: "I want an automated test that launches my iOS app, logs in as a demo user, and checks that the dashboard lists three projects." · expected fires · 1/3, needs 2 · fired: NnTesting:swift-ui-tests
+
+Fix 1 (session bbedd07c-5092-431e-9b0e-935bf07fb674, $1.21): ════ PAI | ALGORITHM (compressed) ═══════════════════════ 🗒️ TASK: Diagnose and fix failed swift-ui-tests trigger case 3
+- Changed: /Users/nelixpro/Coding/SwiftPackages/NnTestKit/.nnai/handoffs/swift-ui-tests-2026-11-26T16-23-02/SKILL.md.backup-2026-11-26T16-23
+- Changed: /Users/nelixpro/Coding/SwiftPackages/NnTestKit/Skills/NnTesting/skills/swift-ui-tests/SKILL.md
+
+Next test: passed
