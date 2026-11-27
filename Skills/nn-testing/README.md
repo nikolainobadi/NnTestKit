@@ -16,7 +16,7 @@ The plugin is published through the `nn-swift-skills` marketplace, pinned to an 
 
 The `nn-testing` marketplace entry is added with the first NnTestKit release that includes this plugin. Until that release, the install command above will not find it.
 
-Projects that use NnTestKit install `NnTesting` instead. It declares `nn-testing` as a dependency, so both arrive together.
+The plugin has no plugin dependencies. Projects that use NnTestKit can also install the `NnTesting` plugin. When its `NnTestKit` skill is available, both skills use it for NnTestKit API details. When it is not, they read those details from the project's existing tests and the resolved NnTestKit package source.
 
 ## Usage
 
@@ -43,7 +43,7 @@ If the type under test is not named, the skill asks for it before doing anything
 
 ## Leak tracking
 
-The conventions say when leak tracking is required and where it lives (`makeSUT`), but not which helper to call. When the test target depends on NnTestKit, the skill hands off to the `NnTestKit` skill in the `NnTesting` plugin for the import, annotation, and call form. When it does not, the skill uses the project's own helper, and asks before adding leak tracking if there is none.
+The conventions say when leak tracking is required and where it lives (`makeSUT`), but not which helper to call. When the test target depends on NnTestKit, the skill uses the `NnTestKit` skill from the `NnTesting` plugin for the import, annotation, and call form if it is installed. If it is not, the skill takes them from an existing leak-tracked test or the resolved package source. When it does not, the skill uses the project's own helper, and asks before adding leak tracking if there is none.
 
 ## Files
 
@@ -66,4 +66,4 @@ Paths are relative to `skills/swift-unit-tests/`. `swift-ui-tests` follows the s
 
 - The skill lives in the NnTestKit repository and is the source of truth; installed copies are snapshots of a release tag. An edit reaches consumers when the next release moves the marketplace `ref`, not when it merges.
 - `nnex ship package` writes the `version` field in `.claude-plugin/plugin.json` on every release. Do not edit it by hand.
-- Keep `swift-unit-tests` free of NnTestKit APIs. A convention that names one belongs in the `NnTestKit` skill. `swift-ui-tests` is built on `BaseUITestCase` and routes to the `NnTestKit` skill for API details.
+- Keep `swift-unit-tests` free of NnTestKit APIs. A convention that names one belongs in the `NnTestKit` skill. `swift-ui-tests` is built on `BaseUITestCase`. It uses the `NnTestKit` skill for API details when that skill is installed, and works without it.

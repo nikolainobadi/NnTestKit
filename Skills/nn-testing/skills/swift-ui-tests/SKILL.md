@@ -31,7 +31,7 @@ UI tests verify complete user flows through the running app. They differ fundame
 | `SeedingReference.md` | Patterns for test data setup via environment keys and typed seed configs | Setting up test data, feature flags, or launch configuration |
 | `UITestHelperPatterns.md` | Reusable helper method patterns (navigation, login, relaunch, data generation) | Writing shared helpers in base classes or extensions |
 
-For NnTestKit API details (method signatures, parameters, behavioral notes), load the `NnTestKit` skill's `UITestApi.md` reference.
+For NnTestKit API details (method signatures, parameters, behavioral notes), load the `NnTestKit` skill's `UITestApi.md` reference when that skill is available. When it is not, continue without it: take helper signatures from the project's existing UI tests and from the `BaseUITestCase` source in the resolved NnTestKit package (`.build/checkouts/NnTestKit` or Xcode's `SourcePackages/checkouts/NnTestKit`). Do not guess a signature; if neither source has it, ask the user.
 
 ---
 

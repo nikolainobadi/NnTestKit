@@ -122,15 +122,18 @@ consumed by every project that installs them.
 
 ### Two layers
 
-`NnTesting`'s `plugin.json` declares `"dependencies": ["nn-testing"]`, the same
-base/dependent shape as nnscaffold's `nn-architecture` → `nn-cli-architecture`.
-A project that can't depend on NnTestKit installs `nn-testing` alone and gets
-the unit-test conventions without the NnTestKit API reference. A project that uses
-NnTestKit installs `NnTesting` and gets both.
+The two plugins are independent: neither declares the other in
+`"dependencies"`, and `NnTesting` does not mention `nn-testing` at all. A
+project installs either or both.
+
+`nn-testing` may refer to the `NnTestKit` skill, but only as optional: every
+reference says what to do when that skill is not installed (read the details
+from the project's existing tests or the resolved NnTestKit package source).
+An `nn-testing` skill must never stop because `NnTesting` is missing.
 
 **Layering rule:** a convention that names an NnTestKit API (`@LeakTracked`,
 `trackForMemoryLeaks`, `NnSwiftTestingHelpers`, …) belongs in the `NnTestKit`
-skill. `swift-unit-tests` states the principle and routes there from one
+skill. `swift-unit-tests` states the principle and routes there, optionally, from one
 place — the "Leak-Tracking Library" section of its `SKILL.md`. Keep
 `swift-unit-tests` free of NnTestKit APIs.
 

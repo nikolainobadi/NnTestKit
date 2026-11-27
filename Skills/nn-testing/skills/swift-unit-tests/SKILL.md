@@ -52,8 +52,8 @@ These conventions name no third-party helper library.
 
 Before writing or revising a `makeSUT` that tracks leaks, check whether the test target depends on the NnTestKit package (`Package.swift` or the Xcode project's package dependencies).
 
-- **It does:** load the **NnTestKit** skill and read its `LeakTrackingConventions.md` completely. It governs the import, the test-type annotation, the `makeSUT` parameters, and the call form.
-- **It does, but the NnTestKit skill is not available:** stop and tell the user to install the `NnTesting` plugin. Do not write the call form from memory.
+- **It does, and the NnTestKit skill is available:** load it and read its `LeakTrackingConventions.md` completely. It governs the import, the test-type annotation, the `makeSUT` parameters, and the call form.
+- **It does, but the NnTestKit skill is not available:** continue without it. Take the import, test-type annotation, parameter list, and call form from the project itself: first from an existing leak-tracked test in the same target, otherwise from the leak-tracking declaration in the resolved NnTestKit package source (`.build/checkouts/NnTestKit` or Xcode's `SourcePackages/checkouts/NnTestKit`). Apply them under `StructuralReference.md` section 6. Do not write the call form from memory; if neither source can be found, ask the user for it.
 - **It does not:** use the project's own leak-tracking helper under `StructuralReference.md` section 6. If there is none, ask the user before adding leak tracking.
 
 ---

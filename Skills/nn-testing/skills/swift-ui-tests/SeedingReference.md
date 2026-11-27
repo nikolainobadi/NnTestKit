@@ -58,7 +58,7 @@ launchSeeded(config: SeedConfig(userRole: .admin, itemCount: 5))
 
 ## NnTestKit Seeding Helpers
 
-NnTestKit provides built-in infrastructure for Tier 2 seeding. See `NnTestKit/UITestApi.md` for full API details.
+NnTestKit provides built-in infrastructure for Tier 2 seeding. For full API details, see the `NnTestKit` skill's `UITestApi.md` when that skill is available, otherwise the `BaseUITestCase` source in the resolved NnTestKit package.
 
 ### Key Methods
 

@@ -1,8 +1,12 @@
 # Leak Tracking Conventions (NnTestKit)
 
-How the leak-tracking rules in the **nn-testing** plugin's `swift-unit-tests` skill (`StructuralReference.md`, section 6) apply when the test target uses NnTestKit.
+How to track memory leaks in a test target that uses NnTestKit.
 
-The general rules live there and are not repeated here: use a `final class` test type only when leak tracking is required, track inside `makeSUT` and never in test cases, and make the call-site parameters the last `makeSUT` parameters, forwarded unchanged. This file adds only what is specific to NnTestKit.
+General rules, which apply with any leak-tracking helper:
+
+- Use a `final class` test type only when leak tracking is required
+- Track inside `makeSUT`, never in test cases
+- The call-site parameters are the last `makeSUT` parameters, forwarded unchanged to the tracking call
 
 For the full API (behaviors, `TrackableObject`, cross-actor safety), see `SwiftTestingApi.md`.
 
