@@ -4,7 +4,7 @@
       "name" : "NnTestKit",
       "path" : ".",
       "skills" : [
-        "Skills/NnTesting"
+        "Skills/NnTestKit"
       ],
       "targetType" : "library"
     }

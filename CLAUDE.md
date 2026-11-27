@@ -116,13 +116,13 @@ consumed by every project that installs it.
 
 | Plugin | Skill | Covers |
 |---|---|---|
-| `Skills/NnTesting` | `skills/NnTestKit` | The API reference — `UnitTestApi.md`, `SwiftTestingApi.md`, `UITestApi.md` — plus `LeakTrackingConventions.md` |
+| `Skills/NnTestKit` | `skills/NnTestKit` | The API reference — `UnitTestApi.md`, `SwiftTestingApi.md`, `UITestApi.md` — plus `LeakTrackingConventions.md` |
 
 ### API reference only
 
-`NnTesting` holds NnTestKit's API reference and nothing else. Unit and UI test
+The `NnTestKit` plugin holds NnTestKit's API reference and nothing else. Unit and UI test
 conventions (`swift-unit-tests`, `swift-ui-tests`) are maintained outside this
-repo as separate plugins. `NnTesting` must not depend on or mention them: it
+repo as separate plugins. The `NnTestKit` plugin must not depend on or mention them: it
 declares no `"dependencies"`, and its skill files make no reference to them.
 
 **Layering rule:** API facts (signatures, parameters, behavior of
@@ -143,7 +143,7 @@ enforces this; it is a review convention.
 ### `plugin.json` `version` is written by nnex
 
 `nnex ship package` sets the `version` field in
-`Skills/NnTesting/.claude-plugin/plugin.json` to the release tag on every
+`Skills/NnTestKit/.claude-plugin/plugin.json` to the release tag on every
 release. **Do not edit it by hand.** Claude Code reads this field first when
 deciding whether an installed plugin has an update, so a hand-typed number that
 falls behind keeps consumers on an old copy. Because nnex writes it alongside the
@@ -158,11 +158,11 @@ branch:
 ```jsonc
 // nn-swift-skills/.claude-plugin/marketplace.json
 {
-  "name": "NnTesting",
+  "name": "NnTestKit",
   "source": {
     "source": "git-subdir",
     "url": "https://github.com/nikolainobadi/NnTestKit.git",
-    "path": "Skills/NnTesting",
+    "path": "Skills/NnTestKit",
     "ref": "2.2.1"          // <- bumped on every release
   }
 }
@@ -176,6 +176,6 @@ actually depend on.
 
 **The failure mode to know about:** an unbumped `ref` serves the previous
 release's documentation forever. Nothing errors and nothing warns. The skill folder
-(`Skills/NnTesting`) is listed as the target's `skills` in `.nnex/nnex.json`, so
+(`Skills/NnTestKit`) is listed as the target's `skills` in `.nnex/nnex.json`, so
 every `nnex ship package` publishes it. If it ever drops out of that list, the API
 reference goes silently stale.

@@ -19,7 +19,7 @@ All test helper libraries should only be included as dependencies in test target
 > **Looking for the complete API reference?** This README is a guided tour of the
 > common paths. Every public symbol — including the UI assertions, control helpers,
 > and test-data generators not shown here — is documented in
-> [`Skills/NnTesting`](Skills/NnTesting), which lives in this repo so it changes in the
+> [`Skills/NnTestKit`](Skills/NnTestKit), which lives in this repo so it changes in the
 > same PR as the API it describes.
 
 ## Table of Contents
