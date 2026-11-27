@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-11-27
+
 ### Changed
 - **BREAKING**: The `NnTesting` plugin is renamed `NnTestKit` and moved from `Skills/NnTesting` to `Skills/NnTestKit`. The skill id `NnTesting:NnTestKit` becomes `NnTestKit:NnTestKit`; consumers enabling `NnTesting@nn-swift-skills` must switch to `NnTestKit@nn-swift-skills`
 
@@ -167,7 +169,8 @@ Documentation and tooling release. No public API changes.
 - Swift 5.5 support with iOS 15+ and macOS 12+ platform requirements
 - Comprehensive README documentation
 
-[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/2.3.0...HEAD
+[Unreleased]: https://github.com/nikolainobadi/NnTestKit/compare/2.3.1...HEAD
+[2.3.1]: https://github.com/nikolainobadi/NnTestKit/compare/2.3.0...2.3.1
 [2.3.0]: https://github.com/nikolainobadi/NnTestKit/compare/2.2.1...2.3.0
 [2.2.0]: https://github.com/nikolainobadi/NnTestKit/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/nikolainobadi/NnTestKit/compare/v2.0.0...v2.1.0
