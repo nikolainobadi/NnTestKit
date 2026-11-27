@@ -1,8 +1,9 @@
 # nn-testing
 
-Library-neutral conventions for Swift unit tests, packaged as a Claude Code plugin. It contains one skill, `swift-unit-tests`, which sets up, writes, and revises unit test files that use Swift Testing (`import Testing`).
+Conventions for Swift tests, packaged as a Claude Code plugin. It contains two skills:
 
-The conventions name no third-party helper library, so the plugin works in projects with or without NnTestKit.
+- `swift-unit-tests` sets up, writes, and revises unit test files that use Swift Testing (`import Testing`). Its conventions name no third-party helper library, so it works in projects with or without NnTestKit.
+- `swift-ui-tests` sets up and writes XCUITest files, accessibility identifiers, and seeding. It is built on NnTestKit's `BaseUITestCase`.
 
 ## Installation
 
@@ -23,21 +24,22 @@ Ask for the work in plain language, or invoke the skill directly with the type u
 
 ```
 /nn-testing:swift-unit-tests MyFeatureManager
+/nn-testing:swift-ui-tests
 ```
 
 | Request | What happens |
 | --- | --- |
+| "Write a UI test that logs in and checks the dashboard" | `swift-ui-tests` writes an XCUITest that drives the flow with `BaseUITestCase` helpers. |
 | "Set up tests for MyFeatureManager" | Creates the test file in an existing test target, or lists the structural violations in an existing one. |
 | "Write unit tests for NetworkClient" | Adds test cases to an existing, structurally valid test file. |
 | "Refactor DailyCareCalculatorTests to follow the conventions" | Audits the file, applies the mechanical fixes, and proposes the judgment calls for confirmation. Behavior is preserved. |
 
 If the type under test is not named, the skill asks for it before doing anything else.
 
-## Limitations
+## Limitations (`swift-unit-tests`)
 
 - It does not write, set up, or revise unit tests for Views: types conforming to `SwiftUI.View`, `UIViewRepresentable`, or `UIViewControllerRepresentable`. ViewModels and similar types are in scope.
 - It never creates a new test target folder. It places files inside one that already exists.
-- UI tests are covered by the `swift-ui-tests` skill in the `NnTesting` plugin, not here.
 
 ## Leak tracking
 
@@ -45,7 +47,7 @@ The conventions say when leak tracking is required and where it lives (`makeSUT`
 
 ## Files
 
-All paths are relative to `skills/swift-unit-tests/`.
+Paths are relative to `skills/swift-unit-tests/`. `swift-ui-tests` follows the same layout: `SKILL.md`, `Workflows/`, and its reference files.
 
 | File | Role |
 | --- | --- |
@@ -64,4 +66,4 @@ All paths are relative to `skills/swift-unit-tests/`.
 
 - The skill lives in the NnTestKit repository and is the source of truth; installed copies are snapshots of a release tag. An edit reaches consumers when the next release moves the marketplace `ref`, not when it merges.
 - `nnex ship package` writes the `version` field in `.claude-plugin/plugin.json` on every release. Do not edit it by hand.
-- Keep this plugin free of NnTestKit APIs. A convention that names one belongs in the `NnTestKit` skill.
+- Keep `swift-unit-tests` free of NnTestKit APIs. A convention that names one belongs in the `NnTestKit` skill. `swift-ui-tests` is built on `BaseUITestCase` and routes to the `NnTestKit` skill for API details.

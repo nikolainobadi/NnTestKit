@@ -1,8 +1,0 @@
-name: UI Tests
-on: [push]
-jobs:
-  ui-tests:
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-      - run: xcodebuild test -project MyApp.xcodeproj -scheme MyApp -destination 'platform=iOS Simulator,name=iPhone 12'

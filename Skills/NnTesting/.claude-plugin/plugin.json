@@ -1,6 +1,6 @@
 {
   "name": "NnTesting",
-  "description": "NnTestKit testing plugin — NnTestKit API reference, NnTestKit leak-tracking conventions, and UI test workflows built on BaseUITestCase. Unit test conventions come from the nn-testing dependency.",
+  "description": "NnTestKit testing plugin — NnTestKit API reference and NnTestKit leak-tracking conventions. Unit and UI test conventions come from the nn-testing dependency.",
   "dependencies": ["nn-testing"],
   "author": { "name": "Nikolai Nobadi" }
 }
