@@ -8,9 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- The `swift-unit-tests` skill moved out of the `NnTesting` plugin into a new library-neutral `nn-testing` plugin at `Skills/nn-testing`. Its skill id changes from `NnTesting:swift-unit-tests` to `nn-testing:swift-unit-tests`
-- The `swift-ui-tests` skill moved out of the `NnTesting` plugin into a new `nn-ui-testing` plugin at `Skills/nn-ui-testing`. Its skill id changes from `NnTesting:swift-ui-tests` to `nn-ui-testing:swift-ui-tests`
-- `NnTesting` no longer depends on or refers to `nn-testing`; the three plugins install independently. The `nn-testing` and `nn-ui-testing` skills use the `NnTestKit` skill when it is installed and continue without it when it is not
+- The `NnTesting` plugin now contains only the `NnTestKit` API reference skill. The `swift-unit-tests` and `swift-ui-tests` skills were removed from it and are no longer published from this repo, so the skill ids `NnTesting:swift-unit-tests` and `NnTesting:swift-ui-tests` stop resolving
 - NnTestKit-specific leak-tracking conventions (`@LeakTracked`, the `makeSUT` call-site parameters, the `trackForMemoryLeaks` call form) moved into the `NnTestKit` skill as `LeakTrackingConventions.md`
 
 ## [2.2.1] - 2026-08-16

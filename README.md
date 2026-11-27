@@ -20,9 +20,7 @@ All test helper libraries should only be included as dependencies in test target
 > common paths. Every public symbol — including the UI assertions, control helpers,
 > and test-data generators not shown here — is documented in
 > [`Skills/NnTesting`](Skills/NnTesting), which lives in this repo so it changes in the
-> same PR as the API it describes. Unit test conventions live alongside
-> it in [`Skills/nn-testing`](Skills/nn-testing), and UI test conventions in
-> [`Skills/nn-ui-testing`](Skills/nn-ui-testing).
+> same PR as the API it describes.
 
 ## Table of Contents
 

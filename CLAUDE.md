@@ -110,37 +110,25 @@ non-`mutating` method, so the decorated type **must be a class**. Applying
 
 ## The Skills (`Skills/`)
 
-The published skills for this package live in this repo, in three plugins. They
-are not copies of documentation kept elsewhere — they *are* the source of truth,
-consumed by every project that installs them.
+The published skill for this package lives in this repo, in one plugin. It is
+not a copy of documentation kept elsewhere — it *is* the source of truth,
+consumed by every project that installs it.
 
 | Plugin | Skill | Covers |
 |---|---|---|
-| `Skills/nn-testing` | `skills/swift-unit-tests` | Unit test conventions and workflows — library-neutral, no NnTestKit APIs |
 | `Skills/NnTesting` | `skills/NnTestKit` | The API reference — `UnitTestApi.md`, `SwiftTestingApi.md`, `UITestApi.md` — plus `LeakTrackingConventions.md` |
-| `Skills/nn-ui-testing` | `skills/swift-ui-tests` | UI test conventions, seeding, accessibility identifiers (built on `BaseUITestCase`) |
 
-### Independent plugins
+### API reference only
 
-The three plugins are independent: none declares another in
-`"dependencies"`, and `NnTesting` does not mention `nn-testing` or
-`nn-ui-testing` at all. A project installs any combination.
+`NnTesting` holds NnTestKit's API reference and nothing else. Unit and UI test
+conventions (`swift-unit-tests`, `swift-ui-tests`) are maintained outside this
+repo as separate plugins. `NnTesting` must not depend on or mention them: it
+declares no `"dependencies"`, and its skill files make no reference to them.
 
-`nn-testing` and `nn-ui-testing` may refer to the `NnTestKit` skill, but only as
-optional: every reference says what to do when that skill is not installed
-(read the details from the project's existing tests or the resolved NnTestKit
-package source). Their skills must never stop because `NnTesting` is missing.
-
-**Layering rule:** a convention that names an NnTestKit API (`@LeakTracked`,
-`trackForMemoryLeaks`, `NnSwiftTestingHelpers`, …) belongs in the `NnTestKit`
-skill. `swift-unit-tests` states the principle and routes there, optionally, from one
-place — the "Leak-Tracking Library" section of its `SKILL.md`. Keep
-`swift-unit-tests` free of NnTestKit APIs.
-
-`swift-ui-tests` is built on `BaseUITestCase` helpers throughout, so it lives in
-its own plugin, `nn-ui-testing`, and installs separately from
-`swift-unit-tests`. It states conventions only; NnTestKit API facts belong in
-`UITestApi.md`, and the skill points there.
+**Layering rule:** API facts (signatures, parameters, behavior of
+`@LeakTracked`, `trackForMemoryLeaks`, `BaseUITestCase`, seeding helpers, …)
+belong in the `NnTestKit` skill. Conventions about how to structure and write
+tests do not.
 
 ### It lives here so it changes with the API
 
@@ -154,8 +142,7 @@ enforces this; it is a review convention.
 
 ### `plugin.json` `version` is written by nnex
 
-`nnex ship package` sets the `version` field in both
-`Skills/nn-testing/.claude-plugin/plugin.json` and
+`nnex ship package` sets the `version` field in
 `Skills/NnTesting/.claude-plugin/plugin.json` to the release tag on every
 release. **Do not edit it by hand.** Claude Code reads this field first when
 deciding whether an installed plugin has an update, so a hand-typed number that
@@ -165,8 +152,8 @@ marketplace `ref` (below), the two always name the same release.
 ## Releasing
 
 Releases go through `nnex ship package`, which tags the release and publishes
-the skills. Both plugins have their own marketplace entry, each **pinned to the
-same release tag**, not to a branch:
+the skill. Its marketplace entry is **pinned to the release tag**, not to a
+branch:
 
 ```jsonc
 // nn-swift-skills/.claude-plugin/marketplace.json
@@ -178,15 +165,6 @@ same release tag**, not to a branch:
     "path": "Skills/NnTesting",
     "ref": "2.2.1"          // <- bumped on every release
   }
-},
-{
-  "name": "nn-testing",
-  "source": {
-    "source": "git-subdir",
-    "url": "https://github.com/nikolainobadi/NnTestKit.git",
-    "path": "Skills/nn-testing",
-    "ref": "2.2.1"          // <- bumped on every release, same tag
-  }
 }
 ```
 
@@ -197,8 +175,7 @@ is the intended trade: what consumers read always describes a version they can
 actually depend on.
 
 **The failure mode to know about:** an unbumped `ref` serves the previous
-release's documentation forever. Nothing errors and nothing warns. All three skill
-folders (`Skills/NnTesting`, `Skills/nn-testing`, and `Skills/nn-ui-testing`) are
-listed as the target's `skills` in `.nnex/nnex.json`, so every `nnex ship package`
-publishes all three. If a folder ever drops out of that list, its conventions go
-silently stale.
+release's documentation forever. Nothing errors and nothing warns. The skill folder
+(`Skills/NnTesting`) is listed as the target's `skills` in `.nnex/nnex.json`, so
+every `nnex ship package` publishes it. If it ever drops out of that list, the API
+reference goes silently stale.

@@ -1,5 +1,0 @@
-{
-  "name": "nn-ui-testing",
-  "description": "Swift UI test conventions built on NnTestKit's BaseUITestCase: XCUITest file structure, accessibility identifiers, seeding, helper patterns, and user-flow tests (swift-ui-tests).",
-  "author": { "name": "Nikolai Nobadi" }
-}
