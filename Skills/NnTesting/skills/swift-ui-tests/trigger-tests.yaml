@@ -1,0 +1,33 @@
+skill: swift-ui-tests
+runs: 3
+pass: 2
+cases:
+  - prompt: "Write UI tests for the checkout flow in my iOS app"
+    expect: fires
+  - prompt: "Write an automated test for my iOS app that walks through the signup screens: enter an email, accept the terms, tap Continue, and confirm the welcome screen appears."
+    expect: fires
+  - prompt: "I want an automated test that launches my iOS app, logs in as a demo user, and checks that the dashboard lists three projects."
+    expect: fires
+  - prompt: "Create a new test class in my iOS app's ui test target that drives the Settings screen through XCUIApplication: toggle dark mode and check the toggle stays on after relaunch."
+    expect: fires
+  - prompt: "I just finished the new four-page onboarding carousel in SwiftUI. Now add an automated test that launches the app, swipes through every page, and verifies the Get Started button shows on the last one."
+    expect: fires
+  - prompt: "QA keeps manually checking that swiping to delete a row in my iOS app's Favorites list and confirming the alert removes it. Write an automated test that performs that check on the simulator."
+    expect: fires
+  - prompt: "What's the difference between XCUITest and unit tests, and when should I use each?"
+    expect: silent
+  - prompt: "Add VoiceOver labels and hints to the buttons on ProfileView so blind users can navigate the screen."
+    expect: silent
+  - prompt: "Run the UI test suite and tell me which tests fail"
+    expect: silent
+  - prompt: "Our UI test job on GitHub Actions fails with 'Application is not installed'. Fix the workflow's simulator destination."
+    expect: silent
+  - prompt: "Write unit tests for LoginViewModel's email and password validation logic"
+    expect: other
+    winner: swift-unit-tests
+  - prompt: "Add XCTest coverage for CartStore's discount calculation, including the expired-coupon case"
+    expect: other
+    winner: swift-unit-tests
+  - prompt: "What parameters does NnTestKit's waitForElement take, and what is its default timeout?"
+    expect: other
+    winner: NnTestKit

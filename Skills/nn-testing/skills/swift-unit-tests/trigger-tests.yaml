@@ -12,7 +12,7 @@ cases:
     expect: fires
   - prompt: "The makeSUT in OrderManagerTests is a mess and the mocks are shared between cases, clean it up"
     expect: fires
-  - prompt: "Nothing checks SyncEngine's retry logic yet. Pin down its behavior so a regression gets caught before I open the PR."
+  - prompt: "Before I open my PR, add coverage for SyncEngine's retry logic: how many attempts it makes, which errors it retries, and when it gives up."
     expect: fires
   - prompt: "What's the difference between XCTest and Swift Testing?"
     expect: silent

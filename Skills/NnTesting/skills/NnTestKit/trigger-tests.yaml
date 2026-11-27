@@ -1,0 +1,33 @@
+skill: NnTestKit
+runs: 3
+pass: 2
+cases:
+  - prompt: "How do I set up @LeakTracked on a Swift Testing suite with NnTestKit?"
+    expect: fires
+  - prompt: "Using NnTestKit, what's the call that fails a test if my ViewModel is still alive after the test finishes, and what arguments does it take?"
+    expect: fires
+  - prompt: "Which NnTestKit helper checks that a closure throws one specific error, and is there an async version of it?"
+    expect: fires
+  - prompt: "I'm halfway through a test for SettingsModel and want to confirm that changing its theme property notifies SwiftUI. What does NnTestKit give me for that, and what minimum OS does it need?"
+    expect: fires
+  - prompt: "With NnTestKit, how does my app code check at runtime whether it was launched by a test run, and which of the package's libraries is safe to link into the production target for that?"
+    expect: fires
+  - prompt: "In NnTestKit, which helper waits for a @Published property on my view model to turn true inside a Swift Testing test, and how is its timeout set?"
+    expect: fires
+  - prompt: "What's the difference between a retain cycle and a memory leak in Swift?"
+    expect: silent
+  - prompt: "Explain how the @Observable macro expands at compile time and how SwiftUI tracks property access."
+    expect: silent
+  - prompt: "Explain how XCTestExpectation and fulfillment(of:timeout:) work in plain XCTest."
+    expect: silent
+  - prompt: "Run swift test and summarize which tests are failing"
+    expect: silent
+  - prompt: "Add XCTest coverage for CartStore's discount calculation, including the expired-coupon case"
+    expect: other
+    winner: swift-unit-tests
+  - prompt: "The makeSUT in OrderManagerTests shares mocks between test cases. Restructure it so each test builds its own."
+    expect: other
+    winner: swift-unit-tests
+  - prompt: "Write UI tests for the checkout flow in my iOS app"
+    expect: other
+    winner: swift-ui-tests

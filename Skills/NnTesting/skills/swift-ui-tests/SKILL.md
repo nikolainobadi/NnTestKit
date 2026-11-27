@@ -1,6 +1,6 @@
 ---
 name: swift-ui-tests
-description: Sets up and writes Swift UI tests (XCUITest) following project conventions with NnTestKit's BaseUITestCase. USE WHEN setting up UI test files, writing UI tests, creating UI test structure, working with XCUITest, BaseUITestCase, accessibility identifiers for testing, UI test seeding, or writing end-to-end iOS tests.
+description: Writes and sets up Swift UI tests (XCUITest) with NnTestKit's BaseUITestCase. Use when writing a test that launches the app and drives a user flow end to end through its screens, even if the request never says UI test, or when setting up UI test files, accessibility identifiers, or seeding.
 argument-hint: [feature-or-flow-under-test]
 ---
 

@@ -1,0 +1,2 @@
+// !$*UTF8*$!
+{ archiveVersion = 1; objectVersion = 56; rootObject = 0; /* targets: MyApp, MyAppTests, MyAppUITests */ }
