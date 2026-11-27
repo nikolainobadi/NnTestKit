@@ -1,6 +1,6 @@
 {
   "version": "2.3.0",
-  "name": "NnTesting",
+  "name": "NnTestKit",
   "description": "NnTestKit testing plugin — NnTestKit API reference and NnTestKit leak-tracking conventions.",
   "author": { "name": "Nikolai Nobadi" }
 }
